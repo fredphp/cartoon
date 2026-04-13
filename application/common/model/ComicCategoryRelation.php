@@ -10,7 +10,7 @@ use think\Model;
 class ComicCategoryRelation extends Model
 {
     // 表名（使用 mha_ 前缀，独立于 fa_ 前缀，需显式声明）
-    protected $table = 'mha_comic_category_relation';
+    protected $table = 'comic_category_relation';
 
     // 开启自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
