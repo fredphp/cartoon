@@ -11,9 +11,8 @@ use app\common\model\Comic;
  */
 class Favorite extends Api
 {
-    // 所有接口都需要登录（收藏、取消收藏、我的收藏列表）
+    // 所有接口都需要登录
     protected $noNeedLogin = [];
-    // 无需鉴权的接口
     protected $noNeedRight = ['*'];
 
     /**
@@ -29,7 +28,6 @@ class Favorite extends Api
             $this->error(__('Invalid parameters'));
         }
 
-        // 验证漫画是否存在
         $comic = Comic::where('id', $comicId)
             ->where('deletetime', null)
             ->where('status', 'normal')
@@ -40,12 +38,10 @@ class Favorite extends Api
 
         $userId = $this->auth->id;
 
-        // 检查是否已收藏
         if (UserFavorite::hasFavorited($userId, $comicId)) {
             $this->error(__('Already favorited'));
         }
 
-        // 创建收藏记录
         UserFavorite::create([
             'user_id'  => $userId,
             'comic_id' => $comicId,
@@ -92,29 +88,27 @@ class Favorite extends Api
     public function index()
     {
         $page = $this->request->param('page/d', 1);
-        $pagesize = $this->request->param('pagesize/d', 10);
-
-        // 限制每页最大条数
-        $pagesize = min($pagesize, 50);
+        $pagesize = min($this->request->param('pagesize/d', 10), 50);
 
         $userId = $this->auth->id;
 
-        $list = UserFavorite::where('user_id', $userId)
-            ->with(['comic' => function ($query) {
-                $query->where('deletetime', null)
-                      ->where('status', 'normal')
-                      ->field('id,title,cover,description,author_id,status,createtime');
-            }])
-            ->order('id', 'desc')
+        // 先查有效漫画ID，再关联收藏表，保证 total 与 list 一致
+        $list = UserFavorite::alias('f')
+            ->join('mha_comic c', 'f.comic_id = c.id', 'INNER')
+            ->where('f.user_id', $userId)
+            ->where('c.status', 'normal')
+            ->where('c.deletetime', null)
+            ->field('f.id,f.user_id,f.comic_id,f.createtime,c.title,c.cover,c.description,c.author_id')
+            ->order('f.id', 'desc')
             ->page($page, $pagesize)
             ->select();
 
-        // 过滤掉漫画已被删除的收藏项
-        $list = $list->filter(function ($item) {
-            return $item->comic !== null;
-        });
-
-        $total = UserFavorite::where('user_id', $userId)->count();
+        $total = UserFavorite::alias('f')
+            ->join('mha_comic c', 'f.comic_id = c.id', 'INNER')
+            ->where('f.user_id', $userId)
+            ->where('c.status', 'normal')
+            ->where('c.deletetime', null)
+            ->count();
 
         $this->success('', [
             'list'       => $list,

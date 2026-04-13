@@ -4,17 +4,14 @@ namespace app\common\model;
 
 use think\Model;
 
-
+/**
+ * 用户关注模型
+ */
 class UserFollow extends Model
 {
+    // 表名（使用 mha_ 前缀，独立于 fa_ 前缀，需显式声明）
+    protected $table = 'mha_user_follow';
 
-    
-
-    
-
-    // 表名
-    protected $name = 'user_follow';
-    
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'integer';
 
@@ -23,11 +20,6 @@ class UserFollow extends Model
     protected $updateTime = 'updatetime';
     protected $deleteTime = false;
 
-    // 追加属性
-    protected $append = [
-
-    ];
-    
     /**
      * 关联被关注的用户（作者）
      */
@@ -91,5 +83,4 @@ class UserFollow extends Model
     {
         return self::where('user_id', $userId)->count();
     }
-    
 }

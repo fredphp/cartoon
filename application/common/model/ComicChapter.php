@@ -4,33 +4,37 @@ namespace app\common\model;
 
 use think\Model;
 use traits\model\SoftDelete;
+use app\common\library\CacheService;
 
 class ComicChapter extends Model
 {
-
     use SoftDelete;
 
-    
+    // 表名（使用 mha_ 前缀）
+    protected $table = 'mha_comic_chapter';
 
-    // 表名
-    protected $name = 'comic_chapter';
-    
-    // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'integer';
-
-    // 定义时间戳字段名
     protected $createTime = 'createtime';
     protected $updateTime = 'updatetime';
     protected $deleteTime = 'deletetime';
 
-    // 追加属性
-    protected $append = [
-        'is_free_text',
-        'status_text'
-    ];
-    
+    protected $append = ['is_free_text', 'status_text'];
 
-    
+    protected static function init()
+    {
+        self::afterInsert(function ($row) {
+            CacheService::clearChapter($row->comic_id, null);
+        });
+
+        self::afterUpdate(function ($row) {
+            CacheService::clearChapter($row->comic_id, $row->id);
+        });
+
+        self::afterDelete(function ($row) {
+            CacheService::clearChapter($row->comic_id, $row->id);
+        });
+    }
+
     public function getIsFreeList()
     {
         return ['0' => __('Is_free 0'), '1' => __('Is_free 1')];
@@ -41,14 +45,12 @@ class ComicChapter extends Model
         return ['normal' => __('Normal'), 'hidden' => __('Hidden')];
     }
 
-
     public function getIsFreeTextAttr($value, $data)
     {
         $value = $value ?: ($data['is_free'] ?? '');
         $list = $this->getIsFreeList();
         return $list[$value] ?? '';
     }
-
 
     public function getStatusTextAttr($value, $data)
     {
@@ -66,7 +68,4 @@ class ComicChapter extends Model
     {
         return $this->hasOne('ComicChapterContent', 'chapter_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
-
-
-
 }

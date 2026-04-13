@@ -4,17 +4,14 @@ namespace app\common\model;
 
 use think\Model;
 
-
+/**
+ * 用户收藏模型
+ */
 class UserFavorite extends Model
 {
+    // 表名（使用 mha_ 前缀，独立于 fa_ 前缀，需显式声明）
+    protected $table = 'mha_user_favorite';
 
-    
-
-    
-
-    // 表名
-    protected $name = 'user_favorite';
-    
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'integer';
 
@@ -22,12 +19,6 @@ class UserFavorite extends Model
     protected $createTime = 'createtime';
     protected $updateTime = 'updatetime';
     protected $deleteTime = false;
-
-    // 追加属性
-    protected $append = [
-
-    ];
-    
 
     /**
      * 关联漫画
@@ -39,6 +30,10 @@ class UserFavorite extends Model
 
     /**
      * 判断用户是否已收藏某漫画
+     *
+     * @param int $userId
+     * @param int $comicId
+     * @return bool
      */
     public static function hasFavorited($userId, $comicId)
     {
@@ -49,11 +44,13 @@ class UserFavorite extends Model
 
     /**
      * 获取用户收藏的漫画ID列表
+     *
+     * @param int $userId
+     * @return array
      */
     public static function getFavoritedIds($userId)
     {
         return self::where('user_id', $userId)
             ->column('comic_id');
     }
-
 }

@@ -13,7 +13,6 @@ class Follow extends Api
 {
     // 所有接口都需要登录
     protected $noNeedLogin = [];
-    // 无需鉴权的接口
     protected $noNeedRight = ['*'];
 
     /**
@@ -31,23 +30,19 @@ class Follow extends Api
 
         $userId = $this->auth->id;
 
-        // 不能关注自己
         if ($userId == $followUserId) {
             $this->error(__('Cannot follow yourself'));
         }
 
-        // 验证被关注的用户是否存在
         $followUser = User::where('id', $followUserId)->find();
         if (!$followUser) {
             $this->error(__('User not found'));
         }
 
-        // 检查是否已关注
         if (UserFollow::hasFollowed($userId, $followUserId)) {
             $this->error(__('Already followed'));
         }
 
-        // 创建关注记录
         UserFollow::create([
             'user_id'         => $userId,
             'follow_user_id'  => $followUserId,
@@ -100,27 +95,23 @@ class Follow extends Api
     public function index()
     {
         $page = $this->request->param('page/d', 1);
-        $pagesize = $this->request->param('pagesize/d', 10);
-
-        // 限制每页最大条数
-        $pagesize = min($pagesize, 50);
+        $pagesize = min($this->request->param('pagesize/d', 10), 50);
 
         $userId = $this->auth->id;
 
-        $list = UserFollow::where('user_id', $userId)
-            ->with(['followUser' => function ($query) {
-                $query->field('id,username,nickname,avatar');
-            }])
-            ->order('id', 'desc')
+        // 先查有效用户，再关联关注表，保证 total 与 list 一致
+        $list = UserFollow::alias('f')
+            ->join('mha_user u', 'f.follow_user_id = u.id', 'INNER')
+            ->where('f.user_id', $userId)
+            ->field('f.id,f.user_id,f.follow_user_id,f.createtime,u.username,u.nickname,u.avatar')
+            ->order('f.id', 'desc')
             ->page($page, $pagesize)
             ->select();
 
-        // 过滤掉用户已被删除的关注项
-        $list = $list->filter(function ($item) {
-            return $item->followUser !== null;
-        });
-
-        $total = UserFollow::where('user_id', $userId)->count();
+        $total = UserFollow::alias('f')
+            ->join('mha_user u', 'f.follow_user_id = u.id', 'INNER')
+            ->where('f.user_id', $userId)
+            ->count();
 
         $this->success('', [
             'list'       => $list,
