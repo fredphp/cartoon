@@ -1,0 +1,292 @@
+<style>
+    /* Layout container */
+    .faredis-container { padding-left: 10px;padding-right: 10px; }
+
+    /* Panels */
+    .panel { box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-radius: 6px; border: 1px solid #eaeaea; overflow: visible; }
+    .panel-heading { background: #fff; border-bottom: 1px solid #f1f1f1; padding: 12px 16px; }
+    .panel-title { font-weight: 600; color: #333; font-size: 15px; }
+
+    /* Left tree */
+    .tree{ max-height: calc(82vh); overflow: auto; overflow-x: hidden; background:#fff; padding:10px; border-radius:4px; border:1px solid #eee; }
+
+    #search_input{ width:100%; padding:8px 12px; border-radius:4px; border:1px solid #ddd; box-shadow:none; margin-bottom:10px; }
+
+    /* Form inputs */
+    .form-group { margin-bottom:14px; }
+    input.form-control, textarea, select.form-control { border-radius:4px; border:1px solid #ddd; box-shadow:none; }
+    textarea { min-height:150px; resize:vertical; }
+    .p-title { font-size:16px; font-weight:700; color:#2c3e50; }
+
+    /* Buttons */
+    .btn-embossed { padding:6px 12px; border-radius:4px; margin-right:8px; }
+    .layer-footer { margin-top:12px; }
+
+    .size, .ttl { font-weight:600; color:#337ab7; margin-left:6px; }
+
+</style>
+
+<div class="row faredis-container">
+    <div class="panel panel-default col-xs-4 col-sm-4">
+    <div class="panel-body">
+        <input type="text" id="search_input" placeholder="在展开节点中搜索.." /><br/>
+        <div id="tree" class="tree"></div>
+    </div>
+</div>
+<div class="col-xs-8 col-sm-8" >
+<!--add key panel-->
+<div class="panel panel-default addkey" hidden style="padding:0%">
+    <div class="panel-heading">
+        <h3 class="panel-title">新增键值</h3>
+    </div>
+    <div class="panel-body">
+        <form id="add-form" class="form-horizontal" role="form-add" data-toggle="validator"
+            method="POST" action="faredis/index/newkey">
+            <input id="c-newdb" class="form-control c-newdb" style="display: none;" name="newdb" type="text">
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Key:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <input id="c-newkey" class="form-control" name="newkey" type="text">
+                </div>                
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">类型:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <select id="c-newtype" class="form-control selectpicker" name="newType">                        
+                        <option value="string">string</option>
+                        <option value="list">list</option>
+                        <option value="set">set</option>
+                        <option value="zset">zset</option>
+                        <option value="hash">hash</option>
+                    </select>
+                </div>                
+            </div>
+            <div class="form-group hash-filed">
+                <label class="control-label col-xs-2 col-sm-2">Field:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <textarea id="c-newfiled" name="newfield" style="width: 100%;" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Value:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <textarea id="c-newvalue" name="newvalue" style="width: 100%;" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="form-group newsource">
+                <label class="control-label col-xs-2 col-sm-2">Score:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <input id="c-newscore" class="form-control" name="newscore" type="number" min="0" step="1">
+                </div>                
+            </div>
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8"> 
+                    <button id="add-reset" type="reset" class="btn btn-default">重置</button>
+                    <button type="submit" class="btn btn-success btn-embossed">新增</button></button>
+                   
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!--string-->
+<div class="panel panel-default string" hidden style="padding:0%">
+    <div class="panel-heading">
+        <h3 class="panel-title p-title">key</h3>
+    </div>
+    <div class="panel-body">
+        <form id="add-form" class="form-horizontal" role="form" data-toggle="validator"
+            method="POST" action="faredis/index/updateValue">
+            <input id="c-db" class="form-control c-db" style="display: none;" name="db" type="text">
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">STRING:</label>
+                <div class="col-xs-2 col-sm-2">
+                    <input id="c-key" class="form-control c-key" readonly name="key" type="text">
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    TTL:<label id="ttl" class="ttl"> </label>
+                    <button type="button" class="btn btn-default btn-embossed rds_rename">重命名</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_del">删除</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_ttl">设置TTL</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Value:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <textarea id="c-value" name="value" style="width: 100%;" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-success btn-embossed">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!--Set list-->
+<div class="panel panel-default set" hidden style="padding:0%">
+    <div class="panel-heading">
+        <h3 class="panel-title p-title">key</h3>
+    </div>
+    <div class="panel-body">
+        <form id="add-form" class="form-horizontal" role="form" data-toggle="validator"
+            method="POST" action="faredis/index/updateValue">
+            <input id="c-db" class="form-control c-db" style="display: none;" name="db" type="text">
+
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2 type-lb">SET:</label>
+                <div class="col-xs-2 col-sm-2">
+                    <input id="c-key" class="form-control c-key" readonly name="key" type="text">
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    元素个数:<label id="size"  class="size"> </label>
+                    &nbsp;&nbsp;TTL:<label id="ttl"  class="ttl"> </label>
+                    <button type="button" class="btn btn-default btn-embossed rds_rename">重命名</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_del">删除</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_ttl">设置TTL</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2"></label>
+                <div class="col-xs-10 col-sm-10" style="display: flex;flex-direction:row;">
+                    <select  multiple="true" style="width: 80%;height: 200px;" id='set-list' name="oldvalue">
+                    </select>
+
+                    <div style="display: flex; flex-direction: column;margin-left: 10px;">
+                        <button type="button" class="btn btn-default btn-embossed rds_add_row">增加项</button>
+                        <button type="button" style="margin-top: 10px;" data-type="set-list" class="btn btn-default btn-embossed rds_delete_row">删除项</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Value:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <textarea id="c-value" class="set-value" name="value" style="width: 100%;" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-success btn-embossed">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--hash-->
+<div class="panel panel-default hash" hidden style="padding:0%">
+    <div class="panel-heading">
+        <h3 class="panel-title p-title">key</h3>
+    </div>
+    <div class="panel-body">
+        <form id="add-form" class="form-horizontal" role="form" data-toggle="validator"
+            method="POST" action="faredis/index/updateValue">
+            <input id="c-db" class="form-control c-db" style="display: none;" name="db" type="text">
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2 type-lb">HASH:</label>
+                <div class="col-xs-2 col-sm-2">
+                    <input id="c-key" class="form-control c-key" readonly name="key" type="text">
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    元素个数:<label id="size"  class="size"> </label>
+                    &nbsp;&nbsp;TTL:<label id="ttl"  class="ttl"> </label>
+                    <button type="button" class="btn btn-default btn-embossed rds_rename">重命名</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_del">删除</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_ttl">设置TTL</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2"></label>
+                <div class="col-xs-10 col-sm-10"  style="display: flex;flex-direction:row;">
+                    <select  multiple="true" style="width: 80%;height: 200px;" id='hash-list'>
+                    </select>
+                    <div style="display: flex; flex-direction: column;margin-left: 10px;">
+                        <button type="button" class="btn btn-default btn-embossed rds_add_row_hash">增加项</button>
+                        <button type="button" style="margin-top: 10px;" data-type="hash-list" class="btn btn-default btn-embossed rds_delete_row">删除项</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Key:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <input id="c-hash-key" class="form-control hash-key" readonly name="hash-key" style="width: 100%;" >
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Value:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <textarea id="c-hash-value" class="hash-value" name="value" style="width: 100%;" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-success btn-embossed">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--zset-->
+<div class="panel panel-default zset" hidden style="padding:0%">
+    <div class="panel-heading">
+        <h3 class="panel-title p-title">key</h3>
+    </div>
+    <div class="panel-body">
+        <form id="add-form" class="form-horizontal" role="form" data-toggle="validator"
+            method="POST" action="faredis/index/updateValue">
+            <input id="c-db" class="form-control c-db" style="display: none;" name="db" type="text">
+
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2 type-lb">ZSET:</label>
+                <div class="col-xs-2 col-sm-2">
+                    <input id="c-key" class="form-control c-key" readonly name="key" type="text">
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    元素个数:<label id="size"  class="size"> </label>
+                    &nbsp;&nbsp;TTL:<label id="ttl"  class="ttl"> </label>
+                    <button type="button" class="btn btn-default btn-embossed rds_rename">重命名</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_del">删除</button>
+                    <button type="button" class="btn btn-default btn-embossed rds_ttl">设置TTL</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2"></label>
+                <div class="col-xs-10 col-sm-10"  style="display: flex;flex-direction:row;">
+                    <select  multiple="true" style="width: 80%;height: 200px;" name="zset-key" id='zset-list'>
+                    </select>
+                    <div style="display: flex; flex-direction: column;margin-left: 10px;">
+                        <button type="button" class="btn btn-default btn-embossed rds_add_row_zset">增加项</button>
+                        <button type="button" style="margin-top: 10px;"  data-type="zset-list" class="btn btn-default btn-embossed rds_delete_row">删除项</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Value:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <input id="c-zset-value" class="form-control zset-value" readonly name="value" style="width: 100%;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-2 col-sm-2">Score:</label>
+                <div class="col-xs-10 col-sm-10">
+                    <input id="c-zset-score" class="form-control zset-score" name="zset-score" type="number" step="1">
+                    </div>
+            </div>
+           
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-success btn-embossed">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+</div>
