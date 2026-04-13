@@ -8,16 +8,10 @@
  * 或在浏览器中访问（需先删除此文件）
  */
 
-// 判断是否在命令行运行
-if (php_sapi_name() === 'cli') {
-    // CLI 模式
-    define('APP_PATH', __DIR__ . '/application/');
-    require __DIR__ . '/thinkphp/base.php';
-} else {
-    // Web 模式 - 直接通过 require 引导
-    define('APP_PATH', __DIR__ . '/application/');
-    require __DIR__ . '/thinkphp/start.php';
-}
+// 统一引导：必须调用 App::initCommon() 才能加载项目自身的 config.php 和 database.php
+define('APP_PATH', __DIR__ . '/application/');
+require __DIR__ . '/thinkphp/base.php';
+\think\App::initCommon();
 
 use think\Db;
 
