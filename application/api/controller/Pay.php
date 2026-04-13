@@ -3,7 +3,7 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
-use app\common\model\UserPurchase;
+use app\common\model\ComicPurchase;
 use app\common\model\ComicChapter;
 use addons\epay\library\Service;
 
@@ -48,11 +48,12 @@ class Pay extends Api
         }
 
         // 检查是否已购买
-        if (UserPurchase::hasPurchased($userId, $chapterId)) {
+        if (ComicPurchase::hasPurchased($userId, $chapterId)) {
             $this->error(__('Already purchased'));
         }
 
         $price = $chapter->price;
+        $comicId = $chapter->comic_id;
 
         // 检测 epay 插件是否已配置
         $epayConfigured = $this->isEpayConfigured();
@@ -76,9 +77,10 @@ class Pay extends Api
 
             // 将业务参数存入缓存，回调时取回
             $orderData = [
-                'user_id'     => $userId,
-                'chapter_id'  => $chapterId,
-                'price'       => $price,
+                'user_id'      => $userId,
+                'chapter_id'   => $chapterId,
+                'comic_id'     => $comicId,
+                'price'        => $price,
                 'out_trade_no' => $outTradeNo,
             ];
             cache('pay_order_' . $outTradeNo, $orderData, 3600);
@@ -104,9 +106,10 @@ class Pay extends Api
             ]);
         } else {
             // ========== 模拟购买（epay 未配置时） ==========
-            UserPurchase::create([
+            ComicPurchase::create([
                 'user_id'    => $userId,
                 'chapter_id' => $chapterId,
+                'comic_id'   => $comicId,
                 'price'      => $price,
             ]);
 
@@ -132,7 +135,7 @@ class Pay extends Api
         }
 
         $userId = $this->auth->id;
-        $purchased = UserPurchase::hasPurchased($userId, $chapterId);
+        $purchased = ComicPurchase::hasPurchased($userId, $chapterId);
 
         $this->success('', [
             'chapter_id'   => $chapterId,
@@ -171,13 +174,15 @@ class Pay extends Api
             } else {
                 $userId = $orderData['user_id'];
                 $chapterId = $orderData['chapter_id'];
+                $comicId = $orderData['comic_id'];
                 $price = $orderData['price'];
 
                 // 创建购买记录（防重复）
-                if (!UserPurchase::hasPurchased($userId, $chapterId)) {
-                    UserPurchase::create([
+                if (!ComicPurchase::hasPurchased($userId, $chapterId)) {
+                    ComicPurchase::create([
                         'user_id'    => $userId,
                         'chapter_id' => $chapterId,
+                        'comic_id'   => $comicId,
                         'price'      => $price,
                     ]);
                 }
