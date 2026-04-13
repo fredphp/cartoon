@@ -33,13 +33,14 @@ class Index extends Api
         $recommendLimit = min($recommendLimit, 20);
         $latestLimit = min($latestLimit, 30);
 
-        // Banner广告 - 按权重排序
+        // Banner广告 - 按位置查询，按权重排序
         $banner = Ad::where('status', 'normal')
-            ->where('type', 'banner')
+            ->where('position', 'banner')
             ->where('deletetime', null)
             ->order('weigh', 'desc')
             ->order('id', 'desc')
             ->limit($bannerLimit)
+            ->field('id,title,image,link,position')
             ->select();
 
         // 推荐漫画 - 随机推荐
@@ -48,7 +49,6 @@ class Index extends Api
             ->count();
         $recommend = [];
         if ($recommendTotal > 0) {
-            // 随机偏移，取一页数据
             $recommendOffset = $recommendTotal > $recommendLimit
                 ? mt_rand(0, $recommendTotal - $recommendLimit)
                 : 0;
@@ -57,7 +57,6 @@ class Index extends Api
                 ->order('id', 'asc')
                 ->limit($recommendOffset, $recommendLimit)
                 ->select();
-            // 打乱顺序
             if (count($recommend) > 0) {
                 $recommend = collection($recommend)->shuffle();
             }
@@ -72,9 +71,9 @@ class Index extends Api
             ->select();
 
         $this->success('', [
-            'banner'   => $banner,
+            'banner'    => $banner,
             'recommend' => $recommend,
-            'latest'   => $latest,
+            'latest'    => $latest,
         ]);
     }
 }
