@@ -10,9 +10,11 @@ class Ad extends Model
 
     use SoftDelete;
 
+    
+
     // 表名
     protected $name = 'ad';
-
+    
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'integer';
 
@@ -23,9 +25,10 @@ class Ad extends Model
 
     // 追加属性
     protected $append = [
-        'status_text',
-        'type_text'
+        'type_text',
+        'status_text'
     ];
+    
 
     protected static function init()
     {
@@ -37,35 +40,18 @@ class Ad extends Model
         });
     }
 
-    /**
-     * 状态列表
-     */
-    public function getStatusList()
-    {
-        return ['normal' => __('Normal'), 'hidden' => __('Hidden')];
-    }
-
-    /**
-     * 状态文本获取器
-     */
-    public function getStatusTextAttr($value, $data)
-    {
-        $value = $value ?: ($data['status'] ?? '');
-        $list = $this->getStatusList();
-        return $list[$value] ?? '';
-    }
-
-    /**
-     * 广告类型列表
-     */
+    
     public function getTypeList()
     {
         return ['banner' => __('Banner'), 'popup' => __('Popup'), 'inline' => __('Inline')];
     }
 
-    /**
-     * 广告类型文本获取器
-     */
+    public function getStatusList()
+    {
+        return ['normal' => __('Normal'), 'hidden' => __('Hidden')];
+    }
+
+
     public function getTypeTextAttr($value, $data)
     {
         $value = $value ?: ($data['type'] ?? '');
@@ -73,9 +59,14 @@ class Ad extends Model
         return $list[$value] ?? '';
     }
 
-    /**
-     * 广告图片获取器 - 自动补全域名
-     */
+
+    public function getStatusTextAttr($value, $data)
+    {
+        $value = $value ?: ($data['status'] ?? '');
+        $list = $this->getStatusList();
+        return $list[$value] ?? '';
+    }
+
     public function getImageAttr($value)
     {
         if ($value && !preg_match('/^https?:\/\//', $value)) {
@@ -83,4 +74,7 @@ class Ad extends Model
         }
         return $value;
     }
+
+
+
 }
