@@ -247,17 +247,3 @@ php think cache:refresh
 
 ---
 
-## 七、已修复问题清单
-
-| # | 问题 | 严重程度 | 修复方案 |
-|---|------|---------|---------|
-| 1 | UserFavorite 用 `$name='user_favorite'` 解析为 `fa_user_favorite` | 🔴 严重 | 改为 `$table = 'mha_user_favorite'` |
-| 2 | UserFollow 用 `$name='user_follow'` 解析为 `fa_user_follow` | 🔴 严重 | 改为 `$table = 'mha_user_follow'` |
-| 3 | Pay 的 notify/returnx 需排除登录 | 🟡 中等 | `$noNeedLogin = ['notify', 'returnx']` ✅已修复 |
-| 4 | Chapter 的 detail 需排除登录 | 🟡 中等 | `$noNeedLogin = ['index', 'detail']` ✅已修复 |
-| 5 | Favorite index 的 total 与 list 不一致 | 🟡 中等 | 改用 INNER JOIN 查询 |
-| 6 | Follow index 的 total 与 list 不一致 | 🟡 中等 | 改用 INNER JOIN 查询 |
-| 7 | CacheService.refreshAll() 不生效 | 🔴 严重 | 增加 force=true 参数强制回源 |
-| 8 | CacheRefresh 命令未注册 | 🟡 中等 | 添加到 application/command.php |
-| 9 | Comic detail 缺分类信息 | 🟢 低 | CacheService 已追加 category_ids |
-| 10 | Comic detail 缺章节数 | 🟢 低 | CacheService 已追加 chapter_count |
