@@ -48,7 +48,7 @@
                         {foreach name="tab.tips" item="tip"}
                         <div class="settings-tip">
                             <i class="fa fa-info-circle" style="color:#faad14;margin-right:6px;"></i>
-                            {$tip|raw}
+                            {:htmlspecialchars_decode($tip)}
                         </div>
                         {/foreach}
 
@@ -157,11 +157,11 @@
                                         {/case}
 
                                         {case value="other"}
-                                        <div class="well well-sm" style="margin-bottom:0;">{$item.value|raw}</div>
+                                        <div class="well well-sm" style="margin-bottom:0;">{:htmlspecialchars_decode($item['value'])}</div>
                                         {/case}
 
                                         {case value="custom"}
-                                        {$item.extend|raw}
+                                        {:htmlspecialchars_decode($item['extend'])}
                                         {/case}
 
                                         {default/}
