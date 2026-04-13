@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫展网 API 接口文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --info: #74b9ff;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --border: #e0e0e0;
+            --code-bg: #2d3436;
+            --code-text: #dfe6e9;
+            --get: #00b894;
+            --post: #0984e3;
+            --put: #fdcb6e;
+            --delete: #e17055;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Sidebar */
+        .layout { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .sidebar-header p { font-size: 12px; opacity: 0.85; }
+        .sidebar nav { padding: 16px 0; }
+        .nav-group { margin-bottom: 4px; }
+        .nav-group-title {
+            padding: 8px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-light);
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .nav-item {
+            display: block;
+            padding: 8px 20px 8px 28px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .nav-item:hover {
+            background: var(--bg);
+            border-left-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .nav-item.active {
+            background: #f0edff;
+            border-left-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .nav-method {
+            display: inline-block;
+            width: 40px;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 3px;
+            padding: 1px 4px;
+            margin-right: 6px;
+        }
+        .nav-method.get { background: #e6f9f1; color: var(--get); }
+        .nav-method.post { background: #e8f4fd; color: var(--post); }
+
+        /* Main Content */
+        .main { margin-left: 280px; flex: 1; }
+        .content { max-width: 960px; margin: 0 auto; padding: 40px 32px 80px; }
+
+        /* Top header */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 32px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .top-bar h2 { font-size: 15px; color: var(--primary); font-weight: 600; }
+        .top-bar .badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: #f0edff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Section */
+        .section { margin-bottom: 48px; }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+        }
+        .section-desc { color: var(--text-light); font-size: 14px; margin-bottom: 24px; }
+
+        /* Info cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .info-card {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        .info-card h3 { font-size: 13px; color: var(--text-light); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-card code {
+            display: block;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            word-break: break-all;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        .info-card p { font-size: 13px; color: var(--text-light); }
+
+        /* API Card */
+        .api-card {
+            background: var(--card);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .api-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .api-card-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            gap: 12px;
+            user-select: none;
+        }
+        .api-card-header:hover { background: #fafafa; }
+        .method-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            min-width: 50px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .method-badge.get { background: var(--get); }
+        .method-badge.post { background: var(--post); }
+        .api-path {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+        }
+        .api-summary { font-size: 13px; color: var(--text-light); flex-shrink: 0; }
+        .auth-tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .auth-tag.public { background: #e6f9f1; color: var(--success); }
+        .auth-tag.login { background: #ffeaa7; color: #d68910; }
+        .auth-tag.callback { background: #dfe6e9; color: #636e72; }
+        .api-arrow {
+            font-size: 12px;
+            color: var(--text-light);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .api-card.open .api-arrow { transform: rotate(90deg); }
+
+        .api-card-body {
+            display: none;
+            padding: 0 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+        .api-card.open .api-card-body { display: block; }
+
+        .api-desc {
+            padding: 16px 0;
+            font-size: 14px;
+            color: var(--text-light);
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 16px;
+        }
+
+        /* Params table */
+        .sub-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 16px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sub-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        th {
+            text-align: left;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        td:first-child {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .required {
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .required.yes { background: #ffe0e0; color: var(--danger); }
+        .required.no { background: #e8e8e8; color: #999; }
+
+        /* Code blocks */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            line-height: 1.7;
+            position: relative;
+        }
+        pre .key { color: #74b9ff; }
+        pre .string { color: #55efc4; }
+        pre .number { color: #fdcb6e; }
+        pre .bool { color: #a29bfe; }
+        pre .null { color: #b2bec3; }
+        pre .comment { color: #636e72; font-style: italic; }
+
+        .code-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: -1px;
+            position: relative;
+            z-index: 2;
+        }
+        .code-tab {
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #e8e8e8;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            color: var(--text-light);
+            transition: all 0.15s;
+        }
+        .code-tab.active { background: var(--code-bg); color: white; }
+
+        /* Mobile hamburger */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 200;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 90;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger { display: flex; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .overlay.open { display: block; }
+            .main { margin-left: 0; }
+            .content { padding: 20px 16px 80px; }
+            .top-bar { padding: 12px 16px 12px 60px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .api-card-header { flex-wrap: wrap; }
+            .api-summary { width: 100%; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+        /* Back to top */
+        .back-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(108,92,231,0.3);
+            z-index: 80;
+            border: none;
+        }
+        .back-top.show { display: flex; }
+    </style>
+</head>
+<body>
+    <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>漫展网 API</h1>
+                <p>v1.0.0 &middot; ThinkPHP 5 + FastAdmin</p>
+            </div>
+            <nav id="nav">
+                <div class="nav-group">
+                    <div class="nav-group-title">概述</div>
+                    <a class="nav-item active" href="#overview">基本信息</a>
+                    <a class="nav-item" href="#auth">认证方式</a>
+                    <a class="nav-item" href="#response">响应格式</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">首页</div>
+                    <a class="nav-item" href="#api-index-index"><span class="nav-method get">GET</span>首页数据</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">漫画</div>
+                    <a class="nav-item" href="#api-comic-index"><span class="nav-method get">GET</span>漫画列表</a>
+                    <a class="nav-item" href="#api-comic-detail"><span class="nav-method get">GET</span>漫画详情</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">章节</div>
+                    <a class="nav-item" href="#api-chapter-index"><span class="nav-method get">GET</span>章节列表</a>
+                    <a class="nav-item" href="#api-chapter-detail"><span class="nav-method get">GET</span>章节详情</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">分类</div>
+                    <a class="nav-item" href="#api-category-index"><span class="nav-method get">GET</span>分类列表</a>
+                    <a class="nav-item" href="#api-category-comics"><span class="nav-method get">GET</span>分类漫画</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">用户</div>
+                    <a class="nav-item" href="#api-user-login"><span class="nav-method post">POST</span>用户登录</a>
+                    <a class="nav-item" href="#api-user-register"><span class="nav-method post">POST</span>用户注册</a>
+                    <a class="nav-item" href="#api-user-mobilelogin"><span class="nav-method post">POST</span>手机验证码登录</a>
+                    <a class="nav-item" href="#api-user-index"><span class="nav-method get">GET</span>会员中心</a>
+                    <a class="nav-item" href="#api-user-profile"><span class="nav-method post">POST</span>修改资料</a>
+                    <a class="nav-item" href="#api-user-logout"><span class="nav-method post">POST</span>退出登录</a>
+                    <a class="nav-item" href="#api-user-resetpwd"><span class="nav-method post">POST</span>重置密码</a>
+                    <a class="nav-item" href="#api-user-changeemail"><span class="nav-method post">POST</span>修改邮箱</a>
+                    <a class="nav-item" href="#api-user-changemobile"><span class="nav-method post">POST</span>修改手机号</a>
+                    <a class="nav-item" href="#api-user-third"><span class="nav-method post">POST</span>第三方登录</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">收藏</div>
+                    <a class="nav-item" href="#api-favorite-add"><span class="nav-method post">POST</span>收藏漫画</a>
+                    <a class="nav-item" href="#api-favorite-remove"><span class="nav-method post">POST</span>取消收藏</a>
+                    <a class="nav-item" href="#api-favorite-index"><span class="nav-method get">GET</span>收藏列表</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">关注</div>
+                    <a class="nav-item" href="#api-follow-add"><span class="nav-method post">POST</span>关注作者</a>
+                    <a class="nav-item" href="#api-follow-remove"><span class="nav-method post">POST</span>取消关注</a>
+                    <a class="nav-item" href="#api-follow-index"><span class="nav-method get">GET</span>关注列表</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">支付</div>
+                    <a class="nav-item" href="#api-pay-purchase"><span class="nav-method post">POST</span>购买章节</a>
+                    <a class="nav-item" href="#api-pay-check"><span class="nav-method get">GET</span>查询购买状态</a>
+                    <a class="nav-item" href="#api-pay-notify"><span class="nav-method post">POST</span>支付回调</a>
+                    <a class="nav-item" href="#api-pay-returnx"><span class="nav-method get">GET</span>支付跳转</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">广告</div>
+                    <a class="nav-item" href="#api-ad-index"><span class="nav-method get">GET</span>广告列表</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Token</div>
+                    <a class="nav-item" href="#api-token-check"><span class="nav-method get">GET</span>检测Token</a>
+                    <a class="nav-item" href="#api-token-refresh"><span class="nav-method post">POST</span>刷新Token</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">公共</div>
+                    <a class="nav-item" href="#api-common-init"><span class="nav-method get">GET</span>初始化配置</a>
+                    <a class="nav-item" href="#api-common-upload"><span class="nav-method post">POST</span>上传文件</a>
+                    <a class="nav-item" href="#api-common-captcha"><span class="nav-method get">GET</span>验证码</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">短信</div>
+                    <a class="nav-item" href="#api-sms-send"><span class="nav-method post">POST</span>发送短信</a>
+                    <a class="nav-item" href="#api-sms-check"><span class="nav-method post">POST</span>检测验证码</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">邮件</div>
+                    <a class="nav-item" href="#api-ems-send"><span class="nav-method post">POST</span>发送邮件</a>
+                    <a class="nav-item" href="#api-ems-check"><span class="nav-method post">POST</span>检测验证码</a>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">验证</div>
+                    <a class="nav-item" href="#api-validate-email-available"><span class="nav-method post">POST</span>检测邮箱可用</a>
+                    <a class="nav-item" href="#api-validate-username-available"><span class="nav-method post">POST</span>检测用户名</a>
+                    <a class="nav-item" href="#api-validate-nickname-available"><span class="nav-method post">POST</span>检测昵称</a>
+                    <a class="nav-item" href="#api-validate-mobile-available"><span class="nav-method post">POST</span>检测手机号</a>
+                    <a class="nav-item" href="#api-validate-mobile-exist"><span class="nav-method post">POST</span>检测手机存在</a>
+                    <a class="nav-item" href="#api-validate-email-exist"><span class="nav-method post">POST</span>检测邮箱存在</a>
+                    <a class="nav-item" href="#api-validate-sms-correct"><span class="nav-method post">POST</span>检测短信验证码</a>
+                    <a class="nav-item" href="#api-validate-ems-correct"><span class="nav-method post">POST</span>检测邮件验证码</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main">
+            <div class="top-bar">
+                <h2>漫展网 API 接口文档</h2>
+                <span class="badge">v1.0.0</span>
+            </div>
+            <div class="content">
+
+                <!-- ============ Overview ============ -->
+                <section class="section" id="overview">
+                    <h2 class="section-title">概述</h2>
+                    <p class="section-desc">漫展网（Cartoon）是基于 ThinkPHP 5 + FastAdmin 开发的漫画阅读平台，提供漫画浏览、章节阅读、用户管理、收藏关注、付费购买等功能。</p>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h3>Base URL</h3>
+                            <code>https://your-domain.com</code>
+                        </div>
+                        <div class="info-card">
+                            <h3>数据格式</h3>
+                            <p>所有接口返回 <strong>JSON</strong> 格式，Content-Type: application/json</p>
+                        </div>
+                        <div class="info-card">
+                            <h3>字符编码</h3>
+                            <p>UTF-8（数据库 utf8mb4）</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============ Auth ============ -->
+                <section class="section" id="auth">
+                    <h2 class="section-title">认证方式</h2>
+                    <p class="section-desc">需要登录的接口需在请求中携带 Token，支持以下三种方式：</p>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h3>方式一：HTTP Header（推荐）</h3>
+                            <code>Token: {token_value}</code>
+                        </div>
+                        <div class="info-card">
+                            <h3>方式二：Query 参数</h3>
+                            <code>?token={token_value}</code>
+                        </div>
+                        <div class="info-card">
+                            <h3>方式三：Cookie</h3>
+                            <code>Cookie: token={token_value}</code>
+                        </div>
+                    </div>
+                    <p style="color:var(--text-light);font-size:13px;margin-top:12px;">Token 有效期为 <strong>30 天</strong>（2,592,000 秒），可通过 <a href="#api-token-refresh" style="color:var(--primary)">刷新接口</a> 续期。</p>
+                </section>
+
+                <!-- ============ Response Format ============ -->
+                <section class="section" id="response">
+                    <h2 class="section-title">响应格式</h2>
+                    <p class="section-desc">所有接口返回统一 JSON 结构：</p>
+                    <pre><span class="comment">// 成功响应</span>
+{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"操作成功"</span>,
+    <span class="key">"time"</span>: <span class="number">1719876543</span>,
+    <span class="key">"data"</span>: { ... }
+}
+
+<span class="comment">// 失败响应</span>
+{
+    <span class="key">"code"</span>: <span class="number">0</span>,
+    <span class="key">"msg"</span>: <span class="string">"错误信息"</span>,
+    <span class="key">"time"</span>: <span class="number">1719876543</span>,
+    <span class="key">"data"</span>: <span class="null">null</span>
+}
+
+<span class="comment">// 未登录（HTTP 401）</span>
+{
+    <span class="key">"code"</span>: <span class="number">0</span>,
+    <span class="key">"msg"</span>: <span class="string">"Please login first"</span>,
+    <span class="key">"time"</span>: <span class="number">1719876543</span>,
+    <span class="key">"data"</span>: <span class="null">null</span>
+}
+
+<span class="comment">// 无权限（HTTP 403）</span>
+{
+    <span class="key">"code"</span>: <span class="number">0</span>,
+    <span class="key">"msg"</span>: <span class="string">"You have no permission"</span>,
+    <span class="key">"time"</span>: <span class="number">1719876543</span>,
+    <span class="key">"data"</span>: <span class="null">null</span>
+}</pre>
+                </section>
+
+                <!-- ============================================================ -->
+                <!--                         API ENDPOINTS                        -->
+                <!-- ============================================================ -->
+
+                <!-- ---- 首页 ---- -->
+                <section class="section" id="api-index-index">
+                    <h2 class="section-title">首页接口</h2>
+                    <p class="section-desc">首页数据聚合，包含 Banner、推荐漫画、最新漫画</p>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/index/index</span>
+                            <span class="api-summary">首页数据</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取首页聚合数据：Banner广告、推荐漫画、最新漫画。所有数据走缓存服务。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>banner_limit</td><td>integer</td><td><span class="required no">否</span></td><td>Banner 数量，默认 5，最大 10</td></tr>
+                                    <tr><td>recommend_limit</td><td>integer</td><td><span class="required no">否</span></td><td>推荐漫画数量，默认 6，最大 20</td></tr>
+                                    <tr><td>latest_limit</td><td>integer</td><td><span class="required no">否</span></td><td>最新漫画数量，默认 10，最大 30</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"banner"</span>: [
+            {
+                <span class="key">"id"</span>: <span class="number">1</span>,
+                <span class="key">"title"</span>: <span class="string">"热门漫画推荐"</span>,
+                <span class="key">"image"</span>: <span class="string">"/uploads/banner/xxx.jpg"</span>,
+                <span class="key">"link"</span>: <span class="string">"/comic/1"</span>,
+                <span class="key">"position"</span>: <span class="string">"banner"</span>
+            }
+        ],
+        <span class="key">"recommend"</span>: [
+            {
+                <span class="key">"id"</span>: <span class="number">1</span>,
+                <span class="key">"title"</span>: <span class="string">"漫画名称"</span>,
+                <span class="key">"cover"</span>: <span class="string">"/uploads/cover/xxx.jpg"</span>,
+                <span class="key">"description"</span>: <span class="string">"漫画简介"</span>,
+                <span class="key">"author_id"</span>: <span class="number">1</span>,
+                <span class="key">"status"</span>: <span class="string">"normal"</span>,
+                <span class="key">"createtime"</span>: <span class="number">1719876543</span>
+            }
+        ],
+        <span class="key">"latest"</span>: [ ... ]
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 漫画 ---- -->
+                <section class="section" id="api-comic-index">
+                    <h2 class="section-title">漫画接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/comic/index</span>
+                            <span class="api-summary">漫画列表</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取漫画分页列表，支持按状态筛选。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>page</td><td>integer</td><td><span class="required no">否</span></td><td>页码，默认 1</td></tr>
+                                    <tr><td>pagesize</td><td>integer</td><td><span class="required no">否</span></td><td>每页条数，默认 10，最大 50</td></tr>
+                                    <tr><td>status</td><td>string</td><td><span class="required no">否</span></td><td>状态筛选：normal（默认）、hidden</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"list"</span>: [
+            {
+                <span class="key">"id"</span>: <span class="number">1</span>,
+                <span class="key">"title"</span>: <span class="string">"漫画名称"</span>,
+                <span class="key">"cover"</span>: <span class="string">"/uploads/cover/xxx.jpg"</span>,
+                <span class="key">"description"</span>: <span class="string">"漫画简介"</span>,
+                <span class="key">"author_id"</span>: <span class="number">1</span>,
+                <span class="key">"status"</span>: <span class="string">"normal"</span>,
+                <span class="key">"weigh"</span>: <span class="number">100</span>,
+                <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+                <span class="key">"updatetime"</span>: <span class="number">1719876543</span>
+            }
+        ],
+        <span class="key">"total"</span>: <span class="number">120</span>,
+        <span class="key">"page"</span>: <span class="number">1</span>,
+        <span class="key">"pagesize"</span>: <span class="number">10</span>,
+        <span class="key">"total_page"</span>: <span class="number">12</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-comic-detail">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/comic/detail</span>
+                            <span class="api-summary">漫画详情</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取指定漫画的详细信息，包含分类ID列表和章节数量统计。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>id</td><td>integer</td><td><span class="required yes">是</span></td><td>漫画 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"id"</span>: <span class="number">1</span>,
+        <span class="key">"title"</span>: <span class="string">"漫画名称"</span>,
+        <span class="key">"cover"</span>: <span class="string">"/uploads/cover/xxx.jpg"</span>,
+        <span class="key">"description"</span>: <span class="string">"漫画详细简介..."</span>,
+        <span class="key">"author_id"</span>: <span class="number">1</span>,
+        <span class="key">"status"</span>: <span class="string">"normal"</span>,
+        <span class="key">"weigh"</span>: <span class="number">100</span>,
+        <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+        <span class="key">"updatetime"</span>: <span class="number">1719876543</span>,
+        <span class="key">"category_ids"</span>: [<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>],
+        <span class="key">"chapter_count"</span>: <span class="number">48</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 章节 ---- -->
+                <section class="section" id="api-chapter-index">
+                    <h2 class="section-title">章节接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/chapter/index</span>
+                            <span class="api-summary">章节列表</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取指定漫画的章节列表。若用户已登录，会额外返回每章的购买状态标记。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>comic_id</td><td>integer</td><td><span class="required yes">是</span></td><td>漫画 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: [
+        {
+            <span class="key">"id"</span>: <span class="number">1</span>,
+            <span class="key">"comic_id"</span>: <span class="number">1</span>,
+            <span class="key">"title"</span>: <span class="string">"第1话 开始"</span>,
+            <span class="key">"price"</span>: <span class="string">"0.00"</span>,
+            <span class="key">"is_free"</span>: <span class="string">"1"</span>,
+            <span class="key">"sort"</span>: <span class="number">1</span>,
+            <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+            <span class="key">"is_purchased"</span>: <span class="bool">true</span>
+        },
+        {
+            <span class="key">"id"</span>: <span class="number">2</span>,
+            <span class="key">"comic_id"</span>: <span class="number">1</span>,
+            <span class="key">"title"</span>: <span class="string">"第2话 命运"</span>,
+            <span class="key">"price"</span>: <span class="string">"1.00"</span>,
+            <span class="key">"is_free"</span>: <span class="string">"0"</span>,
+            <span class="key">"sort"</span>: <span class="number">2</span>,
+            <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+            <span class="key">"is_purchased"</span>: <span class="bool">false</span>
+        }
+    ]
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-chapter-detail">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/chapter/detail</span>
+                            <span class="api-summary">章节详情</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取章节详情及图片列表。免费章节返回全部图片；付费章节未购买时仅返回前 2 张预览图。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>id</td><td>integer</td><td><span class="required yes">是</span></td><td>章节 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"id"</span>: <span class="number">2</span>,
+        <span class="key">"comic_id"</span>: <span class="number">1</span>,
+        <span class="key">"title"</span>: <span class="string">"第2话 命运"</span>,
+        <span class="key">"price"</span>: <span class="string">"1.00"</span>,
+        <span class="key">"is_free"</span>: <span class="string">"0"</span>,
+        <span class="key">"is_purchased"</span>: <span class="bool">false</span>,
+        <span class="key">"sort"</span>: <span class="number">2</span>,
+        <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+        <span class="key">"images"</span>: [
+            <span class="string">"/uploads/chapter/2/001.jpg"</span>,
+            <span class="string">"/uploads/chapter/2/002.jpg"</span>
+        ],
+        <span class="key">"total_images"</span>: <span class="number">20</span>
+    }
+}
+<span class="comment">// 注：付费章节未购买时 images 仅含前2张预览图，total_images 为实际总数</span></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 分类 ---- -->
+                <section class="section" id="api-category-index">
+                    <h2 class="section-title">分类接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/category/index</span>
+                            <span class="api-summary">分类列表</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取所有漫画分类列表。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>with_comic_count</td><td>integer</td><td><span class="required no">否</span></td><td>是否附带漫画数量统计，传 1 则返回 comic_count 字段</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: [
+        {
+            <span class="key">"id"</span>: <span class="number">1</span>,
+            <span class="key">"name"</span>: <span class="string">"热血"</span>,
+            <span class="key">"image"</span>: <span class="string">"/uploads/category/hot.png"</span>,
+            <span class="key">"weigh"</span>: <span class="number">100</span>,
+            <span class="key">"comic_count"</span>: <span class="number">32</span>
+        }
+    ]
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-category-comics">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/category/comics</span>
+                            <span class="api-summary">分类下的漫画</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取指定分类下的漫画分页列表。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>category_id</td><td>integer</td><td><span class="required yes">是</span></td><td>分类 ID</td></tr>
+                                    <tr><td>page</td><td>integer</td><td><span class="required no">否</span></td><td>页码，默认 1</td></tr>
+                                    <tr><td>pagesize</td><td>integer</td><td><span class="required no">否</span></td><td>每页条数，默认 10，最大 50</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"category"</span>: { <span class="key">"id"</span>: <span class="number">1</span>, <span class="key">"name"</span>: <span class="string">"热血"</span> },
+        <span class="key">"list"</span>: [ { <span class="key">"id"</span>: <span class="number">1</span>, <span class="key">"title"</span>: <span class="string">"漫画A"</span>, ... } ],
+        <span class="key">"total"</span>: <span class="number">32</span>,
+        <span class="key">"page"</span>: <span class="number">1</span>,
+        <span class="key">"pagesize"</span>: <span class="number">10</span>,
+        <span class="key">"total_page"</span>: <span class="number">4</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 用户 ---- -->
+                <section class="section" id="api-user-login">
+                    <h2 class="section-title">用户接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/login</span>
+                            <span class="api-summary">用户登录</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">通过用户名/手机号/邮箱 + 密码登录，成功返回 Token。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>account</td><td>string</td><td><span class="required yes">是</span></td><td>账号（用户名/手机号/邮箱）</td></tr>
+                                    <tr><td>password</td><td>string</td><td><span class="required yes">是</span></td><td>密码</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"登录成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"userinfo"</span>: {
+            <span class="key">"id"</span>: <span class="number">1</span>,
+            <span class="key">"username"</span>: <span class="string">"test"</span>,
+            <span class="key">"nickname"</span>: <span class="string">"测试用户"</span>,
+            <span class="key">"mobile"</span>: <span class="string">"13800138000"</span>,
+            <span class="key">"email"</span>: <span class="string">"test@example.com"</span>,
+            <span class="key">"avatar"</span>: <span class="string">"/uploads/avatar/xxx.jpg"</span>,
+            <span class="key">"token"</span>: <span class="string">"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</span>
+        }
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-register">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/register</span>
+                            <span class="api-summary">用户注册</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">注册新用户，需先通过短信接口获取验证码。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>username</td><td>string</td><td><span class="required yes">是</span></td><td>用户名</td></tr>
+                                    <tr><td>password</td><td>string</td><td><span class="required yes">是</span></td><td>密码</td></tr>
+                                    <tr><td>email</td><td>string</td><td><span class="required no">否</span></td><td>邮箱</td></tr>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required no">否</span></td><td>手机号</td></tr>
+                                    <tr><td>code</td><td>string</td><td><span class="required yes">是</span></td><td>短信验证码（event=register）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"注册成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"userinfo"</span>: { ... }
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-mobilelogin">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/mobilelogin</span>
+                            <span class="api-summary">手机验证码登录</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">通过手机号 + 短信验证码登录。若手机号未注册则自动注册。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>手机号（11位）</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>短信验证码（event=mobilelogin）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"登录成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"userinfo"</span>: { ... }
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-index">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/user/index</span>
+                            <span class="api-summary">会员中心</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取当前登录用户的基本信息。</p>
+                            <div class="sub-title">请求参数</div>
+                            <p style="font-size:13px;color:var(--text-light);">无</p>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"welcome"</span>: <span class="string">"测试用户"</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-profile">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/profile</span>
+                            <span class="api-summary">修改资料</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">修改当前登录用户的个人信息，所有字段均为可选，传值即更新。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>avatar</td><td>string</td><td><span class="required no">否</span></td><td>头像地址</td></tr>
+                                    <tr><td>username</td><td>string</td><td><span class="required no">否</span></td><td>用户名（不可重复）</td></tr>
+                                    <tr><td>nickname</td><td>string</td><td><span class="required no">否</span></td><td>昵称（不可重复）</td></tr>
+                                    <tr><td>bio</td><td>string</td><td><span class="required no">否</span></td><td>个人简介</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">""</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-logout">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/logout</span>
+                            <span class="api-summary">退出登录</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">退出当前登录状态，清除 Token。</p>
+                            <div class="sub-title">请求参数</div>
+                            <p style="font-size:13px;color:var(--text-light);">无</p>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"退出成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-resetpwd">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/resetpwd</span>
+                            <span class="api-summary">重置密码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">通过手机号或邮箱 + 验证码重置密码。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>type</td><td>string</td><td><span class="required no">否</span></td><td>重置方式：mobile（默认）/ email</td></tr>
+                                    <tr><td>mobile</td><td>string</td><td>条件必填</td><td>手机号（type=mobile 时必填）</td></tr>
+                                    <tr><td>email</td><td>string</td><td>条件必填</td><td>邮箱（type=email 时必填）</td></tr>
+                                    <tr><td>newpassword</td><td>string</td><td><span class="required yes">是</span></td><td>新密码（6-30位）</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>验证码（event=resetpwd）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"密码重置成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-changeemail">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/changeemail</span>
+                            <span class="api-summary">修改邮箱</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">修改当前用户的邮箱，需通过邮件验证码验证。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>email</td><td>string</td><td><span class="required yes">是</span></td><td>新邮箱地址</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>邮件验证码（event=changeemail）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">""</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-changemobile">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/changemobile</span>
+                            <span class="api-summary">修改手机号</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">修改当前用户的手机号，需通过短信验证码验证。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>新手机号（11位）</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>短信验证码（event=changemobile）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">""</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-user-third">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/user/third</span>
+                            <span class="api-summary">第三方登录</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">通过第三方平台（微信、QQ、微博等）授权 Code 登录。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>platform</td><td>string</td><td><span class="required yes">是</span></td><td>平台名称（wechat / qq / weibo）</td></tr>
+                                    <tr><td>code</td><td>string</td><td><span class="required yes">是</span></td><td>第三方授权 Code</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"登录成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"userinfo"</span>: { ... },
+        <span class="key">"thirdinfo"</span>: { ... }
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 收藏 ---- -->
+                <section class="section" id="api-favorite-add">
+                    <h2 class="section-title">收藏接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/favorite/add</span>
+                            <span class="api-summary">收藏漫画</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">收藏指定漫画，同一漫画不可重复收藏。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>comic_id</td><td>integer</td><td><span class="required yes">是</span></td><td>漫画 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"收藏成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-favorite-remove">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/favorite/remove</span>
+                            <span class="api-summary">取消收藏</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">取消收藏指定漫画。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>comic_id</td><td>integer</td><td><span class="required yes">是</span></td><td>漫画 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"取消收藏成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-favorite-index">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/favorite/index</span>
+                            <span class="api-summary">收藏列表</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取当前用户的收藏列表（分页），含漫画信息。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>page</td><td>integer</td><td><span class="required no">否</span></td><td>页码，默认 1</td></tr>
+                                    <tr><td>pagesize</td><td>integer</td><td><span class="required no">否</span></td><td>每页条数，默认 10，最大 50</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"list"</span>: [
+            {
+                <span class="key">"id"</span>: <span class="number">1</span>,
+                <span class="key">"user_id"</span>: <span class="number">1</span>,
+                <span class="key">"comic_id"</span>: <span class="number">5</span>,
+                <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+                <span class="key">"title"</span>: <span class="string">"漫画名称"</span>,
+                <span class="key">"cover"</span>: <span class="string">"/uploads/cover/xxx.jpg"</span>,
+                <span class="key">"description"</span>: <span class="string">"漫画简介"</span>,
+                <span class="key">"author_id"</span>: <span class="number">1</span>
+            }
+        ],
+        <span class="key">"total"</span>: <span class="number">8</span>,
+        <span class="key">"page"</span>: <span class="number">1</span>,
+        <span class="key">"pagesize"</span>: <span class="number">10</span>,
+        <span class="key">"total_page"</span>: <span class="number">1</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 关注 ---- -->
+                <section class="section" id="api-follow-add">
+                    <h2 class="section-title">关注接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/follow/add</span>
+                            <span class="api-summary">关注作者</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">关注指定用户（作者），不可关注自己。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>follow_user_id</td><td>integer</td><td><span class="required yes">是</span></td><td>被关注的用户 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"关注成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"following_count"</span>: <span class="number">10</span>,
+        <span class="key">"follower_count"</span>: <span class="number">256</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-follow-remove">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/follow/remove</span>
+                            <span class="api-summary">取消关注</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">取消关注指定用户。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>follow_user_id</td><td>integer</td><td><span class="required yes">是</span></td><td>被取消关注的用户 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"取消关注成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"following_count"</span>: <span class="number">9</span>,
+        <span class="key">"follower_count"</span>: <span class="number">255</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-follow-index">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/follow/index</span>
+                            <span class="api-summary">关注列表</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">获取当前用户的关注列表（分页），含用户信息。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>page</td><td>integer</td><td><span class="required no">否</span></td><td>页码，默认 1</td></tr>
+                                    <tr><td>pagesize</td><td>integer</td><td><span class="required no">否</span></td><td>每页条数，默认 10，最大 50</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"list"</span>: [
+            {
+                <span class="key">"id"</span>: <span class="number">1</span>,
+                <span class="key">"user_id"</span>: <span class="number">1</span>,
+                <span class="key">"follow_user_id"</span>: <span class="number">10</span>,
+                <span class="key">"createtime"</span>: <span class="number">1719876543</span>,
+                <span class="key">"username"</span>: <span class="string">"author1"</span>,
+                <span class="key">"nickname"</span>: <span class="string">"作者一"</span>,
+                <span class="key">"avatar"</span>: <span class="string">"/uploads/avatar/xxx.jpg"</span>
+            }
+        ],
+        <span class="key">"total"</span>: <span class="number">9</span>,
+        <span class="key">"page"</span>: <span class="number">1</span>,
+        <span class="key">"pagesize"</span>: <span class="number">10</span>,
+        <span class="key">"total_page"</span>: <span class="number">1</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 支付 ---- -->
+                <section class="section" id="api-pay-purchase">
+                    <h2 class="section-title">支付接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/pay/purchase</span>
+                            <span class="api-summary">购买章节</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">购买付费章节。若 epay 支付插件已配置则发起真实支付；否则模拟购买直接成功。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>chapter_id</td><td>integer</td><td><span class="required yes">是</span></td><td>章节 ID</td></tr>
+                                    <tr><td>pay_type</td><td>string</td><td><span class="required no">否</span></td><td>支付方式：wechat（默认）/ alipay</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例（真实支付）</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"订单创建成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"out_trade_no"</span>: <span class="string">"CP20250101120000123456"</span>,
+        <span class="key">"pay_type"</span>: <span class="string">"wechat"</span>,
+        <span class="key">"price"</span>: <span class="string">"1.00"</span>,
+        <span class="key">"pay_data"</span>: { ... }
+    }
+}</pre>
+                            <div class="sub-title">响应示例（模拟支付）</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"购买成功（模拟）"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"chapter_id"</span>: <span class="number">2</span>,
+        <span class="key">"price"</span>: <span class="string">"1.00"</span>,
+        <span class="key">"mode"</span>: <span class="string">"simulated"</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-pay-check">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/pay/check</span>
+                            <span class="api-summary">查询购买状态</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">查询当前用户是否已购买指定章节。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>chapter_id</td><td>integer</td><td><span class="required yes">是</span></td><td>章节 ID</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"chapter_id"</span>: <span class="number">2</span>,
+        <span class="key">"is_purchased"</span>: <span class="bool">true</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-pay-notify">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/pay/notify</span>
+                            <span class="api-summary">支付回调</span>
+                            <span class="auth-tag callback">回调</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">支付平台异步回调接口，由支付网关调用，客户端不应直接请求。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>paytype</td><td>string</td><td><span class="required no">否</span></td><td>支付方式：wechat（默认）/ alipay</td></tr>
+                                    <tr><td>...</td><td>mixed</td><td>-</td><td>其他参数由支付平台回调携带</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应</div>
+                            <p style="font-size:13px;color:var(--text-light);">成功返回支付平台要求格式；失败返回 <code>{"code":"FAIL","message":"失败"}</code></p>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-pay-returnx">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/pay/returnx</span>
+                            <span class="api-summary">支付跳转</span>
+                            <span class="auth-tag callback">回调</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">支付成功后前端跳转页面，由支付平台重定向。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>paytype</td><td>string</td><td><span class="required no">否</span></td><td>支付方式：wechat（默认）/ alipay</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 广告 ---- -->
+                <section class="section" id="api-ad-index">
+                    <h2 class="section-title">广告接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/ad/index</span>
+                            <span class="api-summary">广告列表</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">按广告位置获取广告列表。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>position</td><td>string</td><td><span class="required no">否</span></td><td>广告位置：banner（默认）/ popup / inline</td></tr>
+                                    <tr><td>limit</td><td>integer</td><td><span class="required no">否</span></td><td>数量，默认 5，最大 20</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: [
+        {
+            <span class="key">"id"</span>: <span class="number">1</span>,
+            <span class="key">"title"</span>: <span class="string">"活动广告"</span>,
+            <span class="key">"image"</span>: <span class="string">"/uploads/ad/xxx.jpg"</span>,
+            <span class="key">"link"</span>: <span class="string">"/activity/1"</span>,
+            <span class="key">"position"</span>: <span class="string">"banner"</span>
+        }
+    ]
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- Token ---- -->
+                <section class="section" id="api-token-check">
+                    <h2 class="section-title">Token 接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/token/check</span>
+                            <span class="api-summary">检测Token</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测当前 Token 是否有效，返回剩余过期时间。</p>
+                            <div class="sub-title">请求参数</div>
+                            <p style="font-size:13px;color:var(--text-light);">无</p>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"token"</span>: <span class="string">"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"</span>,
+        <span class="key">"expires_in"</span>: <span class="number">2592000</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-token-refresh">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/token/refresh</span>
+                            <span class="api-summary">刷新Token</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">刷新当前 Token，旧 Token 失效，返回新 Token（有效期 30 天）。</p>
+                            <div class="sub-title">请求参数</div>
+                            <p style="font-size:13px;color:var(--text-light);">无</p>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"token"</span>: <span class="string">"yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"</span>,
+        <span class="key">"expires_in"</span>: <span class="number">2592000</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 公共 ---- -->
+                <section class="section" id="api-common-init">
+                    <h2 class="section-title">公共接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/common/init</span>
+                            <span class="api-summary">初始化配置</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">应用初始化，返回上传配置、版本信息、城市数据等。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>version</td><td>string</td><td><span class="required yes">是</span></td><td>客户端版本号</td></tr>
+                                    <tr><td>lng</td><td>string</td><td><span class="required yes">是</span></td><td>经度</td></tr>
+                                    <tr><td>lat</td><td>string</td><td><span class="required yes">是</span></td><td>纬度</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">""</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"citydata"</span>: { ... },
+        <span class="key">"versiondata"</span>: { ... },
+        <span class="key">"uploaddata"</span>: {
+            <span class="key">"cdnurl"</span>: <span class="string">"https://cdn.example.com"</span>,
+            <span class="key">"uploadurl"</span>: <span class="string">"/api/common/upload"</span>,
+            <span class="key">"storage"</span>: <span class="string">"local"</span>,
+            <span class="key">"maxsize"</span>: <span class="number">2097152</span>,
+            <span class="key">"mimetype"</span>: [ ... ],
+            <span class="key">"chunking"</span>: <span class="bool">false</span>
+        },
+        <span class="key">"coverdata"</span>: { ... }
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-common-upload">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/common/upload</span>
+                            <span class="api-summary">上传文件</span>
+                            <span class="auth-tag login">需登录</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">上传文件（支持普通上传和分片上传）。</p>
+                            <div class="sub-title">请求参数（普通上传）</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>file</td><td>file</td><td><span class="required yes">是</span></td><td>文件流（multipart/form-data）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">请求参数（分片上传）</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>file</td><td>file</td><td><span class="required yes">是</span></td><td>分片文件流</td></tr>
+                                    <tr><td>chunkid</td><td>string</td><td><span class="required yes">是</span></td><td>分片唯一标识</td></tr>
+                                    <tr><td>chunkindex</td><td>integer</td><td>条件必填</td><td>当前分片索引</td></tr>
+                                    <tr><td>chunkcount</td><td>integer</td><td>条件必填</td><td>总分片数</td></tr>
+                                    <tr><td>action</td><td>string</td><td>条件必填</td><td>操作：merge（合并分片）/ clean（清理分片）</td></tr>
+                                    <tr><td>filename</td><td>string</td><td>条件必填</td><td>原文件名（合并时必填）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{
+    <span class="key">"code"</span>: <span class="number">1</span>,
+    <span class="key">"msg"</span>: <span class="string">"上传成功"</span>,
+    <span class="key">"data"</span>: {
+        <span class="key">"url"</span>: <span class="string">"/uploads/20250101/xxxx.jpg"</span>,
+        <span class="key">"fullurl"</span>: <span class="string">"https://cdn.example.com/uploads/20250101/xxxx.jpg"</span>
+    }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-common-captcha">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge get">GET</span>
+                            <span class="api-path">/api/common/captcha</span>
+                            <span class="api-summary">验证码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">生成图片验证码，返回图片流。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>id</td><td>string</td><td><span class="required yes">是</span></td><td>验证码标识（区分不同场景）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应</div>
+                            <p style="font-size:13px;color:var(--text-light);">返回 image/png 图片流（350 x 150px）</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 短信 ---- -->
+                <section class="section" id="api-sms-send">
+                    <h2 class="section-title">短信接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/sms/send</span>
+                            <span class="api-summary">发送短信</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">发送短信验证码。同一手机号 60 秒内不可重复发送，同一 IP 1 小时内最多 5 条。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>手机号（11位）</td></tr>
+                                    <tr><td>event</td><td>string</td><td><span class="required no">否</span></td><td>事件：register（默认）/ mobilelogin / resetpwd / changemobile</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"发送成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-sms-check">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/sms/check</span>
+                            <span class="api-summary">检测短信验证码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">验证短信验证码是否正确。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>手机号（11位）</td></tr>
+                                    <tr><td>event</td><td>string</td><td><span class="required no">否</span></td><td>事件名称</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>短信验证码</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 邮件 ---- -->
+                <section class="section" id="api-ems-send">
+                    <h2 class="section-title">邮件接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/ems/send</span>
+                            <span class="api-summary">发送邮件验证码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">发送邮箱验证码。同一邮箱 60 秒内不可重复发送，同一 IP 1 小时内最多 5 条。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>email</td><td>string</td><td><span class="required yes">是</span></td><td>邮箱地址</td></tr>
+                                    <tr><td>event</td><td>string</td><td><span class="required no">否</span></td><td>事件：register（默认）/ changeemail / resetpwd</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"发送成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-ems-check">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/ems/check</span>
+                            <span class="api-summary">检测邮件验证码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">验证邮箱验证码是否正确。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>email</td><td>string</td><td><span class="required yes">是</span></td><td>邮箱地址</td></tr>
+                                    <tr><td>event</td><td>string</td><td><span class="required no">否</span></td><td>事件名称</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>邮件验证码</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">"成功"</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---- 验证 ---- -->
+                <section class="section" id="api-validate-email-available">
+                    <h2 class="section-title">验证接口</h2>
+
+                    <div class="api-card">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_email_available</span>
+                            <span class="api-summary">检测邮箱可用</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测邮箱是否可被注册（未被其他用户占用）。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>email</td><td>string</td><td><span class="required yes">是</span></td><td>邮箱地址</td></tr>
+                                    <tr><td>id</td><td>integer</td><td><span class="required no">否</span></td><td>排除的用户 ID（编辑时排除自己）</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="sub-title">响应示例</div>
+                            <pre>{ <span class="key">"code"</span>: <span class="number">1</span>, <span class="key">"msg"</span>: <span class="string">""</span>, <span class="key">"data"</span>: <span class="null">null</span> }</pre>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-username-available">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_username_available</span>
+                            <span class="api-summary">检测用户名可用</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测用户名是否可被注册。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>username</td><td>string</td><td><span class="required yes">是</span></td><td>用户名</td></tr>
+                                    <tr><td>id</td><td>integer</td><td><span class="required no">否</span></td><td>排除的用户 ID</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-nickname-available">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_nickname_available</span>
+                            <span class="api-summary">检测昵称可用</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测昵称是否可被使用。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>nickname</td><td>string</td><td><span class="required yes">是</span></td><td>昵称</td></tr>
+                                    <tr><td>id</td><td>integer</td><td><span class="required no">否</span></td><td>排除的用户 ID</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-mobile-available">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_mobile_available</span>
+                            <span class="api-summary">检测手机号可用</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测手机号是否可被注册。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>手机号</td></tr>
+                                    <tr><td>id</td><td>integer</td><td><span class="required no">否</span></td><td>排除的用户 ID</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-mobile-exist">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_mobile_exist</span>
+                            <span class="api-summary">检测手机号存在</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测手机号是否已注册（用于找回密码等场景）。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>手机号</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-email-exist">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_email_exist</span>
+                            <span class="api-summary">检测邮箱存在</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">检测邮箱是否已注册。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>email</td><td>string</td><td><span class="required yes">是</span></td><td>邮箱地址</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-sms-correct">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_sms_correct</span>
+                            <span class="api-summary">检测短信验证码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">验证短信验证码是否正确（独立校验接口）。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>mobile</td><td>string</td><td><span class="required yes">是</span></td><td>手机号</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>短信验证码</td></tr>
+                                    <tr><td>event</td><td>string</td><td><span class="required yes">是</span></td><td>事件名称</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="api-card" id="api-validate-ems-correct">
+                        <div class="api-card-header" onclick="toggleCard(this)">
+                            <span class="method-badge post">POST</span>
+                            <span class="api-path">/api/validate/check_ems_correct</span>
+                            <span class="api-summary">检测邮件验证码</span>
+                            <span class="auth-tag public">公开</span>
+                            <span class="api-arrow">&#9654;</span>
+                        </div>
+                        <div class="api-card-body">
+                            <p class="api-desc">验证邮件验证码是否正确（独立校验接口）。</p>
+                            <div class="sub-title">请求参数</div>
+                            <table>
+                                <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                                <tbody>
+                                    <tr><td>email</td><td>string</td><td><span class="required yes">是</span></td><td>邮箱地址</td></tr>
+                                    <tr><td>captcha</td><td>string</td><td><span class="required yes">是</span></td><td>邮件验证码</td></tr>
+                                    <tr><td>event</td><td>string</td><td><span class="required yes">是</span></td><td>事件名称</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer style="text-align:center;padding:40px 0 20px;color:var(--text-light);font-size:13px;border-top:1px solid var(--border);margin-top:48px;">
+                    <p>漫展网 API 文档 v1.0.0 &middot; 基于 ThinkPHP 5 + FastAdmin</p>
+                    <p style="margin-top:4px;">Generated at 2025-07-12</p>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#9650;</button>
+
+    <script>
+        // Toggle API card
+        function toggleCard(header) {
+            const card = header.parentElement;
+            card.classList.toggle('open');
+        }
+
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.querySelector('.overlay').classList.toggle('open');
+        }
+
+        // Active nav tracking
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-item[href^="#"]');
+
+        function updateActiveNav() {
+            let current = '';
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 120) {
+                    current = section.id;
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Back to top
+        function updateBackTop() {
+            const btn = document.getElementById('backTop');
+            if (window.scrollY > 400) {
+                btn.classList.add('show');
+            } else {
+                btn.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('scroll', () => {
+            updateActiveNav();
+            updateBackTop();
+        });
+
+        // Smooth scroll for nav links
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Close mobile sidebar
+                    document.getElementById('sidebar').classList.remove('open');
+                    document.querySelector('.overlay').classList.remove('open');
+                }
+            });
+        });
+
+        // Initialize
+        updateActiveNav();
+    </script>
+</body>
+</html>
