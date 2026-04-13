@@ -1,0 +1,207 @@
+<style type="text/css">
+    .settings-container .panel-body { padding: 0; }
+    .settings-container .nav-tabs { border-bottom: 2px solid #e8e8e8; padding: 0 15px; background: #f8f8f8; }
+    .settings-container .nav-tabs > li { margin-right: 2px; }
+    .settings-container .nav-tabs > li > a { border: none; border-radius: 4px 4px 0 0; padding: 10px 18px; color: #666; font-size: 13px; transition: all 0.15s; }
+    .settings-container .nav-tabs > li > a:hover { background: #e0e0e0; color: #333; }
+    .settings-container .nav-tabs > li.active > a,
+    .settings-container .nav-tabs > li.active > a:hover,
+    .settings-container .nav-tabs > li.active > a:focus { border: none; background: #fff; color: #1e88e5; font-weight: 600; border-bottom: 2px solid #1e88e5; margin-bottom: -2px; }
+    .settings-container .nav-tabs > li > a .tab-icon { margin-right: 6px; font-size: 12px; }
+    .settings-form { padding: 20px 25px; }
+    .settings-form .form-group { margin-bottom: 20px; }
+    .settings-form .control-label { font-weight: 600; color: #555; font-size: 13px; padding-top: 7px; }
+    .settings-form .help-block { font-size: 12px; color: #999; margin-top: 5px; }
+    .settings-form .fieldlist dd { margin-bottom: 6px; }
+    .settings-form .fieldlist dd input { font-size: 12px; }
+    .settings-tip { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #666; line-height: 1.8; }
+    .settings-tip a { color: #1890ff; text-decoration: underline; }
+    .settings-section-title { font-size: 14px; font-weight: 700; color: #333; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; }
+    .settings-section-title .section-icon { margin-right: 8px; color: #1e88e5; }
+    @media (max-width: 768px) {
+        .settings-form .col-sm-8, .settings-form .col-sm-3 { width: 100%; }
+        .settings-form .control-label { text-align: left; padding-bottom: 5px; }
+    }
+</style>
+
+<div class="panel panel-default panel-intro settings-container">
+    <div class="panel-heading">
+        {:build_heading(null, false)}
+        <ul class="nav nav-tabs" id="settingsTabs">
+            {foreach $tabList as $key=>$tab}
+            <li class="{$tab.active ? 'active' : ''}">
+                <a href="#tab-{$key}" data-toggle="tab">
+                    <i class="fa {$tab.icon} tab-icon"></i>{$tab.title}
+                </a>
+            </li>
+            {/foreach}
+        </ul>
+    </div>
+
+    <div class="panel-body">
+        <div class="tab-content">
+            {foreach $tabList as $key=>$tab}
+            <div class="tab-pane fade {$tab.active ? 'active in' : ''}" id="tab-{$key}">
+                <div class="settings-form">
+                    {if !empty($tab.items)}
+                        <!-- Tips -->
+                        {foreach $tab.tips as $tip}
+                        <div class="settings-tip">
+                            <i class="fa fa-info-circle" style="color:#faad14;margin-right:6px;"></i>
+                            {$tip|raw}
+                        </div>
+                        {/foreach}
+
+                        <!-- 按 addon 分组显示 -->
+                        {php}
+                            $grouped = [];
+                            foreach ($tab['items'] as $item) {
+                                $grouped[$item['addon']][] = $item;
+                            }
+                        {/php}
+                        {foreach $grouped as $addonName=>$items}
+                        <div class="addon-group" data-addon="{$addonName}">
+                            {if count($grouped) > 1}
+                            <div class="settings-section-title">
+                                <i class="fa fa-puzzle-piece section-icon"></i>
+                                {:ucfirst($addonName)} 插件配置
+                            </div>
+                            {/if}
+
+                            <form class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('settings/save')}">
+                                <input type="hidden" name="addon" value="{$addonName}" />
+                                {:token()}
+
+                                {foreach $items as $item}
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3">
+                                        {$item.title}
+                                        {if $item.rule == 'required'}
+                                        <span class="text-danger" style="margin-left:2px;">*</span>
+                                        {/if}
+                                    </label>
+                                    <div class="col-xs-12 col-sm-8">
+                                        {switch $item.type}
+                                        {case string}
+                                        <input type="text" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule}" placeholder="{$item.tip}" />
+                                        {/case}
+
+                                        {case password}
+                                        <input type="password" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule}" placeholder="{$item.tip}" />
+                                        {/case}
+
+                                        {case number}
+                                        <input type="number" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule}" placeholder="{$item.tip}" />
+                                        {/case}
+
+                                        {case text}
+                                        <textarea name="row[{$item.name}]" class="form-control" data-rule="{$item.rule}" rows="4" placeholder="{$item.tip}">{$item.value|htmlentities}</textarea>
+                                        {/case}
+
+                                        {case array}
+                                        <dl class="fieldlist" data-name="row[{$item.name}]">
+                                            <dd>
+                                                <ins>配置项</ins>
+                                                <ins>配置值</ins>
+                                            </dd>
+                                            <dd>
+                                                <a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a>
+                                            </dd>
+                                            <textarea name="row[{$item.name}]" class="form-control hide" cols="30" rows="5">{:json_encode($item.value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)}</textarea>
+                                        </dl>
+                                        {/case}
+
+                                        {case radio}
+                                        <div class="radio">
+                                        {foreach name="item.content" item="vo"}
+                                        <label for="row_{$addonName}_{$item.name}_{$key}">
+                                            <input id="row_{$addonName}_{$item.name}_{$key}" name="row[{$item.name}]" type="radio" value="{$key}" {in name="key" value="$item.value"}checked{/in} /> {$vo|htmlentities}
+                                        </label>
+                                        {/foreach}
+                                        </div>
+                                        {/case}
+
+                                        {case checkbox}
+                                        <div class="checkbox">
+                                        {foreach name="item.content" item="vo"}
+                                        <label for="row_{$addonName}_{$item.name}_{$key}" style="margin-right:15px;">
+                                            <input id="row_{$addonName}_{$item.name}_{$key}" name="row[{$item.name}][]" type="checkbox" value="{$key}" {in name="key" value="$item.value"}checked{/in} /> {$vo|htmlentities}
+                                        </label>
+                                        {/foreach}
+                                        </div>
+                                        {/case}
+
+                                        {case value="select" break="0"}{/case}
+                                        {case value="selects"}
+                                        <select name="row[{$item.name}]{$item.type=='selects'?'[]':''}" class="form-control selectpicker" {$item.type=='selects'?'multiple':''}>
+                                            {foreach name="item.content" item="vo"}
+                                            <option value="{$key}" {in name="key" value="$item.value"}selected{/in}>{$vo|htmlentities}</option>
+                                            {/foreach}
+                                        </select>
+                                        {/case}
+
+                                        {case value="image" break="0"}{/case}
+                                        {case value="images"}
+                                        <div class="form-inline">
+                                            <input id="c-{$addonName}-{$item.name}" class="form-control" size="50" name="row[{$item.name}]" type="text" value="{$item.value|htmlentities}">
+                                            <span><button type="button" id="faupload-{$addonName}-{$item.name}" class="btn btn-danger faupload" data-input-id="c-{$addonName}-{$item.name}" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="{$item.type=='image'?'false':'true'}" data-preview-id="p-{$addonName}-{$item.name}"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                                            <span><button type="button" id="fachoose-{$addonName}-{$item.name}" class="btn btn-primary fachoose" data-input-id="c-{$addonName}-{$item.name}" data-mimetype="image/*" data-multiple="{$item.type=='image'?'false':'true'}"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                                            <ul class="row list-inline faupload-preview" id="p-{$addonName}-{$item.name}"></ul>
+                                        </div>
+                                        {/case}
+
+                                        {case switch}
+                                        <input id="c-{$addonName}-{$item.name}" name="row[{$item.name}]" type="hidden" value="{:$item.value?1:0}">
+                                        <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-{$addonName}-{$item.name}" data-yes="1" data-no="0">
+                                            <i class="fa fa-toggle-on text-success {if !$item.value}fa-flip-horizontal text-gray{/if} fa-2x"></i>
+                                        </a>
+                                        {/case}
+
+                                        {case bool}
+                                        <label><input name="row[{$item.name}]" type="radio" value="1" {$item.value?'checked':''} /> {:__('Yes')}</label>&nbsp;
+                                        <label><input name="row[{$item.name}]" type="radio" value="0" {$item.value?'':'checked'} /> {:__('No')}</label>
+                                        {/case}
+
+                                        {case other}
+                                        <div class="well well-sm" style="margin-bottom:0;">{$item.value|raw}</div>
+                                        {/case}
+
+                                        {case custom}
+                                        {$item.extend|raw}
+                                        {/case}
+
+                                        {default/}
+                                        <input type="text" name="row[{$item.name}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule}" placeholder="{$item.tip}" />
+                                        {/switch}
+
+                                        {if $item.tip && $item.type != 'string' && $item.type != 'password' && $item.type != 'number' && $item.type != 'text'}
+                                        <span class="help-block">{$item.tip}</span>
+                                        {/if}
+                                    </div>
+                                </div>
+                                {/foreach}
+
+                                <div class="form-group" style="margin-top:30px;padding-top:20px;border-top:1px solid #f0f0f0;">
+                                    <label class="control-label col-xs-12 col-sm-3"></label>
+                                    <div class="col-xs-12 col-sm-8">
+                                        <button type="submit" class="btn btn-primary btn-embossed disabled">
+                                            <i class="fa fa-check"></i> {:__('Save')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        {/foreach}
+
+                    {else /}
+                    <div class="text-center" style="padding:60px 0;color:#999;">
+                        <i class="fa fa-inbox fa-3x" style="color:#ddd;display:block;margin-bottom:15px;"></i>
+                        暂无配置项或插件未安装
+                    </div>
+                    {/if}
+                </div>
+            </div>
+            {/foreach}
+        </div>
+    </div>
+</div>
