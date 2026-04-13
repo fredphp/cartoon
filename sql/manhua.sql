@@ -11,11 +11,40 @@
  Target Server Version : 80043 (8.0.43)
  File Encoding         : 65001
 
- Date: 13/04/2026 10:11:00
+ Date: 13/04/2026 13:27:18
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for mha_ad
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_ad`;
+CREATE TABLE `mha_ad` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `title` varchar(100) NOT NULL DEFAULT '' COMMENT '广告标题',
+  `image` varchar(255) NOT NULL DEFAULT '' COMMENT '广告图片',
+  `link` varchar(255) NOT NULL DEFAULT '' COMMENT '跳转链接',
+  `position` varchar(30) NOT NULL DEFAULT 'banner' COMMENT '广告位置: banner=首页轮播,popup=弹窗,inline=信息流',
+  `type` enum('banner','popup','inline') NOT NULL DEFAULT 'banner' COMMENT '广告类型',
+  `status` enum('normal','hidden') NOT NULL DEFAULT 'normal' COMMENT '状态',
+  `weigh` int NOT NULL DEFAULT '0' COMMENT '排序权重',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int unsigned DEFAULT NULL COMMENT '更新时间',
+  `deletetime` int unsigned DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`),
+  KEY `weigh` (`weigh`,`id`),
+  KEY `status` (`status`),
+  KEY `type` (`type`),
+  KEY `position` (`position`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='广告表';
+
+-- ----------------------------
+-- Records of mha_ad
+-- ----------------------------
+BEGIN;
+COMMIT;
 
 -- ----------------------------
 -- Table structure for mha_admin
@@ -225,7 +254,7 @@ CREATE TABLE `mha_auth_rule` (
   UNIQUE KEY `name` (`name`) USING BTREE,
   KEY `pid` (`pid`),
   KEY `weigh` (`weigh`)
-) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='节点表';
+) ENGINE=InnoDB AUTO_INCREMENT=159 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='节点表';
 
 -- ----------------------------
 -- Records of mha_auth_rule
@@ -333,6 +362,60 @@ INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`
 INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (102, 'file', 0, 'third', '第三方登录管理', 'fa fa-users', '', '', '', 1, NULL, '', 'dsfdlgl', 'disanfangdengluguanli', 1776044901, 1776044901, 0, 'normal');
 INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (103, 'file', 102, 'third/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776044901, 1776044901, 0, 'normal');
 INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (104, 'file', 102, 'third/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776044901, 1776044901, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (105, 'file', 0, 'comic', '漫画管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'mhgl', 'manhuaguanli', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (106, 'file', 105, 'comic/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (107, 'file', 105, 'comic/recyclebin', '回收站', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hsz', 'huishouzhan', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (108, 'file', 105, 'comic/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (109, 'file', 105, 'comic/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (110, 'file', 105, 'comic/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (111, 'file', 105, 'comic/destroy', '真实删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zssc', 'zhenshishanchu', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (112, 'file', 105, 'comic/restore', '还原', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hy', 'huanyuan', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (113, 'file', 105, 'comic/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776051635, 1776051635, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (114, 'file', 0, 'ad', '广告管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'gggl', 'guanggaoguanli', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (115, 'file', 114, 'ad/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (116, 'file', 114, 'ad/recyclebin', '回收站', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hsz', 'huishouzhan', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (117, 'file', 114, 'ad/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (118, 'file', 114, 'ad/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (119, 'file', 114, 'ad/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (120, 'file', 114, 'ad/destroy', '真实删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zssc', 'zhenshishanchu', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (121, 'file', 114, 'ad/restore', '还原', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hy', 'huanyuan', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (122, 'file', 114, 'ad/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776052314, 1776052314, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (123, 'file', 0, 'comic_chapter', '漫画章节管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'mhzjgl', 'manhuazhangjieguanli', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (124, 'file', 123, 'comic_chapter/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (125, 'file', 123, 'comic_chapter/recyclebin', '回收站', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hsz', 'huishouzhan', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (126, 'file', 123, 'comic_chapter/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (127, 'file', 123, 'comic_chapter/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (128, 'file', 123, 'comic_chapter/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (129, 'file', 123, 'comic_chapter/destroy', '真实删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zssc', 'zhenshishanchu', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (130, 'file', 123, 'comic_chapter/restore', '还原', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hy', 'huanyuan', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (131, 'file', 123, 'comic_chapter/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776053519, 1776053519, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (132, 'file', 0, 'comic_chapter_content', '漫画章节内容管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'mhzjnrgl', 'manhuazhangjieneirongguanli', 1776053527, 1776053527, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (133, 'file', 132, 'comic_chapter_content/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776053527, 1776053527, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (134, 'file', 132, 'comic_chapter_content/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776053527, 1776053527, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (135, 'file', 132, 'comic_chapter_content/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776053527, 1776053527, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (136, 'file', 132, 'comic_chapter_content/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776053527, 1776053527, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (137, 'file', 132, 'comic_chapter_content/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776053527, 1776053527, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (138, 'file', 0, 'user_favorite', '用户收藏管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'yhscgl', 'yonghushoucangguanli', 1776054796, 1776054796, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (139, 'file', 138, 'user_favorite/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776054796, 1776054796, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (140, 'file', 138, 'user_favorite/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776054796, 1776054796, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (141, 'file', 138, 'user_favorite/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776054796, 1776054796, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (142, 'file', 138, 'user_favorite/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776054796, 1776054796, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (143, 'file', 138, 'user_favorite/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776054796, 1776054796, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (144, 'file', 0, 'user_follow', '用户关注管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'yhgzgl', 'yonghuguanzhuguanli', 1776055752, 1776055752, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (145, 'file', 144, 'user_follow/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776055752, 1776055752, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (146, 'file', 144, 'user_follow/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776055752, 1776055752, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (147, 'file', 144, 'user_follow/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776055752, 1776055752, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (148, 'file', 144, 'user_follow/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776055752, 1776055752, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (149, 'file', 144, 'user_follow/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776055752, 1776055752, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (150, 'file', 0, 'comic_category', '漫画分类管理', 'fa fa-circle-o', '', '', '', 1, NULL, '', 'mhflgl', 'manhuafenleiguanli', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (151, 'file', 150, 'comic_category/index', '查看', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zk', 'zhakan', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (152, 'file', 150, 'comic_category/recyclebin', '回收站', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hsz', 'huishouzhan', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (153, 'file', 150, 'comic_category/add', '添加', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'tj', 'tianjia', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (154, 'file', 150, 'comic_category/edit', '编辑', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'bj', 'bianji', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (155, 'file', 150, 'comic_category/del', '删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'sc', 'shanchu', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (156, 'file', 150, 'comic_category/destroy', '真实删除', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'zssc', 'zhenshishanchu', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (157, 'file', 150, 'comic_category/restore', '还原', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'hy', 'huanyuan', 1776056986, 1776056986, 0, 'normal');
+INSERT INTO `mha_auth_rule` (`id`, `type`, `pid`, `name`, `title`, `icon`, `url`, `condition`, `remark`, `ismenu`, `menutype`, `extend`, `py`, `pinyin`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (158, 'file', 150, 'comic_category/multi', '批量更新', 'fa fa-circle-o', '', '', '', 0, NULL, '', 'plgx', 'pilianggengxin', 1776056986, 1776056986, 0, 'normal');
 COMMIT;
 
 -- ----------------------------
@@ -376,6 +459,143 @@ INSERT INTO `mha_category` (`id`, `pid`, `type`, `name`, `nickname`, `flag`, `im
 INSERT INTO `mha_category` (`id`, `pid`, `type`, `name`, `nickname`, `flag`, `image`, `keywords`, `description`, `diyname`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (11, 7, 'page', 'SASS平台软件', 'company-sass', 'recommend', '/assets/img/qrcode.png', '', '', 'company-sass', 1491635035, 1491635035, 11, 'normal');
 INSERT INTO `mha_category` (`id`, `pid`, `type`, `name`, `nickname`, `flag`, `image`, `keywords`, `description`, `diyname`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (12, 0, 'test', '测试1', 'test1', 'recommend', '/assets/img/qrcode.png', '', '', 'test1', 1491635035, 1491635035, 12, 'normal');
 INSERT INTO `mha_category` (`id`, `pid`, `type`, `name`, `nickname`, `flag`, `image`, `keywords`, `description`, `diyname`, `createtime`, `updatetime`, `weigh`, `status`) VALUES (13, 0, 'test', '测试2', 'test2', 'recommend', '/assets/img/qrcode.png', '', '', 'test2', 1491635035, 1491635035, 13, 'normal');
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_comic
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_comic`;
+CREATE TABLE `mha_comic` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `title` varchar(100) NOT NULL DEFAULT '' COMMENT '漫画标题',
+  `cover` varchar(255) NOT NULL DEFAULT '' COMMENT '封面图',
+  `description` text COMMENT '漫画简介',
+  `author_id` int unsigned NOT NULL DEFAULT '0' COMMENT '作者ID',
+  `status` enum('normal','hidden') NOT NULL DEFAULT 'normal' COMMENT '状态',
+  `weigh` int NOT NULL DEFAULT '0' COMMENT '排序权重',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int unsigned DEFAULT NULL COMMENT '更新时间',
+  `deletetime` int unsigned DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`),
+  KEY `weigh` (`weigh`,`id`),
+  KEY `status` (`status`),
+  KEY `author_id` (`author_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='漫画表';
+
+-- ----------------------------
+-- Records of mha_comic
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_comic_category
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_comic_category`;
+CREATE TABLE `mha_comic_category` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '分类名称',
+  `image` varchar(255) NOT NULL DEFAULT '' COMMENT '分类图标',
+  `weigh` int NOT NULL DEFAULT '0' COMMENT '排序权重',
+  `status` enum('normal','hidden') NOT NULL DEFAULT 'normal',
+  `createtime` int unsigned DEFAULT NULL,
+  `updatetime` int unsigned DEFAULT NULL,
+  `deletetime` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='漫画分类表';
+
+-- ----------------------------
+-- Records of mha_comic_category
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_comic_category_relation
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_comic_category_relation`;
+CREATE TABLE `mha_comic_category_relation` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `comic_id` int unsigned NOT NULL DEFAULT '0' COMMENT '漫画ID',
+  `category_id` int unsigned NOT NULL DEFAULT '0' COMMENT '分类ID',
+  `createtime` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_comic_category` (`comic_id`,`category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='漫画分类关联表';
+
+-- ----------------------------
+-- Records of mha_comic_category_relation
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_comic_chapter
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_comic_chapter`;
+CREATE TABLE `mha_comic_chapter` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `comic_id` int unsigned NOT NULL DEFAULT '0' COMMENT '漫画ID',
+  `title` varchar(100) NOT NULL DEFAULT '' COMMENT '章节标题',
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '价格(0=免费)',
+  `is_free` enum('0','1') NOT NULL DEFAULT '1' COMMENT '是否免费:0=付费,1=免费',
+  `sort` int NOT NULL DEFAULT '0' COMMENT '排序(越小越前)',
+  `status` enum('normal','hidden') NOT NULL DEFAULT 'normal' COMMENT '状态',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int unsigned DEFAULT NULL COMMENT '更新时间',
+  `deletetime` int unsigned DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`),
+  KEY `comic_id` (`comic_id`),
+  KEY `sort` (`sort`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='漫画章节表';
+
+-- ----------------------------
+-- Records of mha_comic_chapter
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_comic_chapter_content
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_comic_chapter_content`;
+CREATE TABLE `mha_comic_chapter_content` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `chapter_id` int unsigned NOT NULL DEFAULT '0' COMMENT '章节ID',
+  `images` text COMMENT '图片列表(JSON数组)',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int unsigned DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `chapter_id` (`chapter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='漫画章节内容表';
+
+-- ----------------------------
+-- Records of mha_comic_chapter_content
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_comic_purchase
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_comic_purchase`;
+CREATE TABLE `mha_comic_purchase` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `chapter_id` int unsigned NOT NULL DEFAULT '0' COMMENT '章节ID',
+  `comic_id` int unsigned NOT NULL DEFAULT '0' COMMENT '漫画ID',
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '购买价格',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_chapter` (`user_id`,`chapter_id`),
+  KEY `comic_id` (`comic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='漫画购买记录表';
+
+-- ----------------------------
+-- Records of mha_comic_purchase
+-- ----------------------------
+BEGIN;
 COMMIT;
 
 -- ----------------------------
@@ -615,6 +835,50 @@ CREATE TABLE `mha_user` (
 -- ----------------------------
 BEGIN;
 INSERT INTO `mha_user` (`id`, `group_id`, `username`, `nickname`, `password`, `salt`, `email`, `mobile`, `avatar`, `level`, `gender`, `birthday`, `bio`, `money`, `score`, `successions`, `maxsuccessions`, `prevtime`, `logintime`, `loginip`, `loginfailure`, `loginfailuretime`, `joinip`, `jointime`, `createtime`, `updatetime`, `token`, `status`, `verification`) VALUES (1, 1, 'admin', 'admin', '6b8630caed5f61934299e0332a637933', '879217', 'admin@163.com', '13000000000', '/assets/img/avatar.png', 0, 0, '2017-04-08', '', 0.00, 0, 1, 1, 1491635035, 1491635035, '127.0.0.1', 0, 1491635035, '127.0.0.1', 1491635035, 0, 1491635035, '', 'normal', '');
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_user_favorite
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_user_favorite`;
+CREATE TABLE `mha_user_favorite` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `comic_id` int unsigned NOT NULL DEFAULT '0' COMMENT '漫画ID',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int unsigned DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_comic` (`user_id`,`comic_id`),
+  KEY `user_id` (`user_id`),
+  KEY `comic_id` (`comic_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户收藏表';
+
+-- ----------------------------
+-- Records of mha_user_favorite
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for mha_user_follow
+-- ----------------------------
+DROP TABLE IF EXISTS `mha_user_follow`;
+CREATE TABLE `mha_user_follow` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '用户ID（关注者）',
+  `follow_user_id` int unsigned NOT NULL DEFAULT '0' COMMENT '被关注的用户ID（作者）',
+  `createtime` int unsigned DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int unsigned DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_follow` (`user_id`,`follow_user_id`),
+  KEY `user_id` (`user_id`),
+  KEY `follow_user_id` (`follow_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户关注表';
+
+-- ----------------------------
+-- Records of mha_user_follow
+-- ----------------------------
+BEGIN;
 COMMIT;
 
 -- ----------------------------
