@@ -234,13 +234,6 @@ class Settings extends Backend
             $this->error($e->getMessage());
         }
 
-        // 尝试刷新插件
-        try {
-            \addons\Service::refresh();
-        } catch (Exception $e) {
-            // 刷新失败不影响保存
-        }
-
         $this->success(__('Update successful'));
     }
 }
