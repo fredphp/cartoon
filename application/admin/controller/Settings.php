@@ -68,15 +68,15 @@ class Settings extends Backend
     public function index()
     {
         $tabList = [];
-        $defaultTab = '';
 
         foreach ($this->categories as $key => $category) {
             $tabData = [
-                'key'   => $key,
-                'title' => $category['title'],
-                'icon'  => $category['icon'],
-                'items' => [],
-                'tips'  => [],
+                'key'     => $key,
+                'title'   => $category['title'],
+                'icon'    => $category['icon'],
+                'tips'    => [],
+                'groups'  => [],  // 按 addon 分组的配置
+                'hasItem' => false,
             ];
 
             foreach ($category['addons'] as $addonName) {
@@ -91,6 +91,8 @@ class Settings extends Backend
                     continue;
                 }
 
+                $groupItems = [];
+
                 foreach ($fullConfig as $item) {
                     // 跳过内部提示字段
                     if ($item['name'] === '__tips__') {
@@ -99,53 +101,63 @@ class Settings extends Backend
                     }
 
                     $value = $item['value'];
+                    $type  = $item['type'];
+                    $rule  = isset($item['rule']) ? $item['rule'] : '';
+                    $tip   = isset($item['tip']) ? $item['tip'] : '';
 
-                    // 处理不同类型的值
-                    if (in_array($item['type'], ['checkbox', 'selects'])) {
-                        $value = explode(',', $value);
+                    // 多选值拆分为数组
+                    if (in_array($type, ['checkbox', 'selects'])) {
+                        $value = is_array($value) ? $value : explode(',', $value);
                     }
 
-                    // array 类型保持原样（作为关联数组传递给视图）
-                    // 处理 content 字段
+                    // 处理 content 字段（下拉/单选/多选的选项列表）
                     $content = [];
                     if (!empty($item['content'])) {
-                        if (is_string($item['content'])) {
-                            $content = json_decode($item['content'], true) ?: [];
-                        } else {
-                            $content = $item['content'];
-                        }
+                        $content = is_array($item['content']) ? $item['content'] : (json_decode($item['content'], true) ?: []);
                     }
 
-                    $tabData['items'][] = [
-                        'addon'  => $addonName,
-                        'name'   => $item['name'],
-                        'title'  => __($item['title']),
-                        'type'   => $item['type'],
-                        'value'  => $value,
-                        'content' => $content,
-                        'rule'   => $item['rule'] ?? '',
-                        'tip'    => htmlspecialchars($item['tip'] ?? ''),
-                        'extend' => $item['extend'] ?? '',
+                    // array 类型转为 JSON 字符串供前端 fieldlist 使用
+                    $valueJson = '';
+                    if ($type === 'array' && is_array($value)) {
+                        $valueJson = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                    }
+
+                    $groupItems[] = [
+                        'addon'     => $addonName,
+                        'name'      => $item['name'],
+                        'title'     => __($item['title']),
+                        'type'      => $type,
+                        'value'     => $value,
+                        'valueJson' => $valueJson,
+                        'content'   => $content,
+                        'rule'      => $rule,
+                        'tip'       => htmlspecialchars($tip),
+                        'extend'    => isset($item['extend']) ? $item['extend'] : '',
+                    ];
+
+                    $tabData['hasItem'] = true;
+                }
+
+                if (!empty($groupItems)) {
+                    $tabData['groups'][] = [
+                        'addon' => $addonName,
+                        'items' => $groupItems,
                     ];
                 }
             }
 
             $tabList[$key] = $tabData;
-            if (empty($defaultTab) && !empty($tabData['items'])) {
-                $defaultTab = $key;
-            }
         }
 
-        // 设置第一个有内容的Tab为活跃
-        $index = 0;
+        // 设置第一个Tab为活跃
+        $first = true;
         foreach ($tabList as &$tab) {
-            $tab['active'] = ($index === 0);
-            $index++;
+            $tab['active'] = $first;
+            $first = false;
         }
         unset($tab);
 
         $this->view->assign('tabList', $tabList);
-        $this->view->assign('defaultTab', $defaultTab);
         return $this->view->fetch();
     }
 
@@ -180,7 +192,6 @@ class Settings extends Backend
         }
 
         // 构建新的配置值映射
-        $newValues = [];
         foreach ($fullConfig as &$item) {
             if ($item['name'] === '__tips__') {
                 continue;
@@ -193,11 +204,11 @@ class Settings extends Backend
 
                 // 处理 array 类型
                 if ($item['type'] === 'array') {
-                    if (is_array($value) && isset($value['field'])) {
-                        // fieldlist 格式：从 field/key 和 field/value 构建关联数组
+                    if (is_array($value) && isset($value['key'])) {
+                        // fieldlist 格式：从 key 和 value 构建关联数组
                         $arr = [];
-                        $keys = $value['key'] ?? [];
-                        $vals = $value['value'] ?? [];
+                        $keys = $value['key'];
+                        $vals = isset($value['value']) ? $value['value'] : [];
                         foreach ($keys as $i => $k) {
                             $k = trim($k);
                             if ($k === '') {
@@ -206,9 +217,6 @@ class Settings extends Backend
                             $arr[$k] = isset($vals[$i]) ? $vals[$i] : '';
                         }
                         $value = $arr;
-                    } elseif (is_array($value)) {
-                        // 如果已经是关联数组，直接使用
-                        $value = $value;
                     }
                 } elseif (is_array($value)) {
                     // checkbox/selects 等多选值，转为逗号分隔
@@ -216,7 +224,6 @@ class Settings extends Backend
                 }
 
                 $item['value'] = $value;
-                $newValues[$name] = $value;
             }
         }
         unset($item);
